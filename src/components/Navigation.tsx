@@ -1,11 +1,21 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Wrench, Users, Newspaper, BarChart3 } from "lucide-react";
+import { Menu, X, Home, Wrench, Users, Newspaper, BarChart3, Settings, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, isAG, signOut } = useAuth();
 
   const navItems = [
     { path: "/", label: "Accueil", icon: Home },
@@ -44,6 +54,48 @@ const Navigation = () => {
                 </Link>
               );
             })}
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Settings className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isAG && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/artisans">Gérer les artisans</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/assemblee">Gérer l'assemblée</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/actualites">Gérer les actualités</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/sondages">Gérer les sondages</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Connexion
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

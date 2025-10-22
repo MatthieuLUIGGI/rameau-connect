@@ -1,63 +1,135 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-interface Poll {
-  id: number;
+interface Sondage {
+  id: string;
   question: string;
   options: string[];
-  voted: boolean;
-  results?: number[];
+  active: boolean;
+}
+
+interface Vote {
+  sondage_id: string;
+  option_index: number;
 }
 
 const Sondages = () => {
-  const [polls, setPolls] = useState<Poll[]>([
-    {
-      id: 1,
-      question: "Souhaitez-vous l'installation de bornes électriques dans le parking ?",
-      options: ["Oui, absolument", "Oui, mais avec participation financière", "Non, pas pour l'instant", "Je ne sais pas"],
-      voted: false,
-      results: [45, 30, 15, 10]
-    },
-    {
-      id: 2,
-      question: "Préférez-vous un système de compostage collectif ?",
-      options: ["Oui, je suis intéressé(e)", "Peut-être, selon les modalités", "Non merci"],
-      voted: false,
-      results: [60, 25, 15]
-    },
-    {
-      id: 3,
-      question: "Quelle fréquence souhaitez-vous pour le nettoyage des parties communes ?",
-      options: ["Une fois par semaine", "Deux fois par semaine", "Trois fois par semaine"],
-      voted: false,
-      results: [20, 55, 25]
+  const [sondages, setSondages] = useState<Sondage[]>([]);
+  const [userVotes, setUserVotes] = useState<Vote[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: number }>({});
+  const [results, setResults] = useState<{ [key: string]: number[] }>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      fetchSondages();
+      fetchUserVotes();
     }
-  ]);
+  }, [user]);
 
-  const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: string }>({});
-
-  const handleVote = (pollId: number) => {
-    if (!selectedOptions[pollId]) return;
-
-    setPolls(polls.map(poll => 
-      poll.id === pollId ? { ...poll, voted: true } : poll
-    ));
+  const fetchSondages = async () => {
+    const { data, error } = await supabase
+      .from('sondages')
+      .select('*')
+      .eq('active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      const formatted = (data || []).map(s => ({
+        ...s,
+        options: s.options as string[]
+      }));
+      setSondages(formatted);
+      
+      // Fetch results for all polls
+      formatted.forEach(sondage => {
+        fetchResults(sondage.id);
+      });
+    }
+    setIsLoading(false);
   };
 
-  const getColorForIndex = (index: number) => {
-    const colors = [
-      "bg-primary",
-      "bg-accent", 
-      "bg-secondary",
-      "bg-muted"
-    ];
-    return colors[index % colors.length];
+  const fetchUserVotes = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('votes')
+      .select('sondage_id, option_index')
+      .eq('user_id', user.id);
+    
+    if (!error && data) {
+      setUserVotes(data);
+    }
   };
+
+  const fetchResults = async (sondageId: string) => {
+    const { data, error } = await supabase
+      .from('votes')
+      .select('option_index')
+      .eq('sondage_id', sondageId);
+    
+    if (!error && data) {
+      const sondage = sondages.find(s => s.id === sondageId);
+      if (!sondage) return;
+      
+      const total = data.length;
+      const counts = new Array(sondage.options.length).fill(0);
+      
+      data.forEach(vote => {
+        counts[vote.option_index]++;
+      });
+      
+      const percentages = counts.map(count => 
+        total > 0 ? Math.round((count / total) * 100) : 0
+      );
+      
+      setResults(prev => ({ ...prev, [sondageId]: percentages }));
+    }
+  };
+
+  const handleVote = async (sondageId: string) => {
+    if (!user || selectedOptions[sondageId] === undefined) return;
+
+    const { error } = await supabase
+      .from('votes')
+      .insert([{
+        sondage_id: sondageId,
+        user_id: user.id,
+        option_index: selectedOptions[sondageId]
+      }]);
+    
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Succès', description: 'Votre vote a été enregistré' });
+      fetchUserVotes();
+      fetchResults(sondageId);
+    }
+  };
+
+  const hasVoted = (sondageId: string) => {
+    return userVotes.some(v => v.sondage_id === sondageId);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-24 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-12">
@@ -71,72 +143,83 @@ const Sondages = () => {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-8">
-          {polls.map((poll, index) => (
-            <Card 
-              key={poll.id} 
-              className="border-border animate-slide-up"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">{poll.question}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!poll.voted ? (
-                  <div className="space-y-4">
-                    <RadioGroup
-                      value={selectedOptions[poll.id]}
-                      onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [poll.id]: value })}
-                    >
-                      {poll.options.map((option, optIndex) => (
-                        <div key={optIndex} className="flex items-center space-x-2">
-                          <RadioGroupItem value={option} id={`${poll.id}-${optIndex}`} />
-                          <Label 
-                            htmlFor={`${poll.id}-${optIndex}`}
-                            className="cursor-pointer text-foreground"
-                          >
-                            {option}
-                          </Label>
+        {sondages.length === 0 ? (
+          <div className="text-center text-muted-foreground">
+            Aucun sondage actif pour le moment.
+          </div>
+        ) : (
+          <div className="max-w-3xl mx-auto space-y-8">
+            {sondages.map((sondage, index) => {
+              const voted = hasVoted(sondage.id);
+              const pollResults = results[sondage.id] || [];
+              
+              return (
+                <Card 
+                  key={sondage.id} 
+                  className="border-border animate-slide-up"
+                  style={{ animationDelay: `${index * 150}ms` }}
+                >
+                  <CardHeader>
+                    <CardTitle className="text-xl text-foreground">{sondage.question}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {!voted ? (
+                      <div className="space-y-4">
+                        <RadioGroup
+                          value={selectedOptions[sondage.id]?.toString()}
+                          onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [sondage.id]: parseInt(value) })}
+                        >
+                          {sondage.options.map((option, optIndex) => (
+                            <div key={optIndex} className="flex items-center space-x-2">
+                              <RadioGroupItem value={optIndex.toString()} id={`${sondage.id}-${optIndex}`} />
+                              <Label 
+                                htmlFor={`${sondage.id}-${optIndex}`}
+                                className="cursor-pointer text-foreground"
+                              >
+                                {option}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                        <Button 
+                          onClick={() => handleVote(sondage.id)}
+                          disabled={selectedOptions[sondage.id] === undefined}
+                          className="w-full"
+                        >
+                          Envoyer ma réponse
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-accent mb-4">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span className="font-medium">Merci pour votre participation !</span>
                         </div>
-                      ))}
-                    </RadioGroup>
-                    <Button 
-                      onClick={() => handleVote(poll.id)}
-                      disabled={!selectedOptions[poll.id]}
-                      className="w-full"
-                    >
-                      Envoyer ma réponse
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-accent mb-4">
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span className="font-medium">Merci pour votre participation !</span>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      {poll.options.map((option, optIndex) => (
-                        <div key={optIndex} className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-foreground">{option}</span>
-                            <span className="font-semibold text-muted-foreground">
-                              {poll.results?.[optIndex]}%
-                            </span>
-                          </div>
-                          <Progress 
-                            value={poll.results?.[optIndex]} 
-                            className="h-2"
-                          />
+                        
+                        <div className="space-y-3">
+                          {sondage.options.map((option, optIndex) => (
+                            <div key={optIndex} className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-foreground">{option}</span>
+                                <span className="font-semibold text-muted-foreground">
+                                  {pollResults[optIndex] || 0}%
+                                </span>
+                              </div>
+                              <Progress 
+                                value={pollResults[optIndex] || 0} 
+                                className="h-2"
+                              />
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
