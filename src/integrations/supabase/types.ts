@@ -225,6 +225,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_poll_results: {
+        Args: { poll_id: string }
+        Returns: {
+          option_index: number
+          percentage: number
+          vote_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

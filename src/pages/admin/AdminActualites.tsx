@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { z } from 'zod';
 
 interface Actualite {
   id: string;
@@ -18,6 +19,13 @@ interface Actualite {
   image_url: string | null;
   published_at: string;
 }
+
+const actualiteSchema = z.object({
+  title: z.string().trim().min(1, "Le titre est requis").max(200, "Le titre ne peut pas dépasser 200 caractères"),
+  excerpt: z.string().trim().max(500, "L'extrait ne peut pas dépasser 500 caractères").optional(),
+  content: z.string().trim().min(1, "Le contenu est requis").max(50000, "Le contenu ne peut pas dépasser 50000 caractères"),
+  image_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal(''))
+});
 
 const AdminActualites = () => {
   const [actualites, setActualites] = useState<Actualite[]>([]);
@@ -51,6 +59,14 @@ const AdminActualites = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const validation = actualiteSchema.safeParse(formData);
+    if (!validation.success) {
+      const errors = validation.error.errors.map(e => e.message).join(', ');
+      toast({ title: 'Validation échouée', description: errors, variant: 'destructive' });
+      return;
+    }
     
     if (editingActualite) {
       const { error } = await supabase

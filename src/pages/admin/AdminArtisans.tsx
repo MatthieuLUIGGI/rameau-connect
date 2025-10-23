@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { z } from 'zod';
 
 interface Artisan {
   id: string;
@@ -17,6 +18,14 @@ interface Artisan {
   email: string | null;
   description: string | null;
 }
+
+const artisanSchema = z.object({
+  name: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères"),
+  domain: z.string().trim().min(1, "Le domaine est requis").max(100, "Le domaine ne peut pas dépasser 100 caractères"),
+  phone: z.string().trim().max(20, "Le téléphone ne peut pas dépasser 20 caractères").optional().or(z.literal('')),
+  email: z.string().trim().email("Email invalide").max(255, "L'email ne peut pas dépasser 255 caractères").optional().or(z.literal('')),
+  description: z.string().trim().max(1000, "La description ne peut pas dépasser 1000 caractères").optional().or(z.literal(''))
+});
 
 const AdminArtisans = () => {
   const [artisans, setArtisans] = useState<Artisan[]>([]);
@@ -50,6 +59,14 @@ const AdminArtisans = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const validation = artisanSchema.safeParse(formData);
+    if (!validation.success) {
+      const errors = validation.error.errors.map(e => e.message).join(', ');
+      toast({ title: 'Validation échouée', description: errors, variant: 'destructive' });
+      return;
+    }
     
     if (editingArtisan) {
       const { error } = await supabase

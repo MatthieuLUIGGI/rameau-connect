@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { z } from 'zod';
 
 interface Membre {
   id: string;
@@ -16,6 +17,13 @@ interface Membre {
   level: number;
   photo_url: string | null;
 }
+
+const membreSchema = z.object({
+  name: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères"),
+  position: z.string().trim().min(1, "La fonction est requise").max(100, "La fonction ne peut pas dépasser 100 caractères"),
+  level: z.number().int().min(1).max(2),
+  photo_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal(''))
+});
 
 const AdminAssemblee = () => {
   const [membres, setMembres] = useState<Membre[]>([]);
@@ -49,6 +57,14 @@ const AdminAssemblee = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input
+    const validation = membreSchema.safeParse(formData);
+    if (!validation.success) {
+      const errors = validation.error.errors.map(e => e.message).join(', ');
+      toast({ title: 'Validation échouée', description: errors, variant: 'destructive' });
+      return;
+    }
     
     if (editingMembre) {
       const { error } = await supabase

@@ -75,25 +75,22 @@ const Sondages = () => {
   };
 
   const fetchResults = async (sondageId: string) => {
+    // Use server-side aggregation function to get poll results
+    // This prevents exposing individual voting patterns
     const { data, error } = await supabase
-      .from('votes')
-      .select('option_index')
-      .eq('sondage_id', sondageId);
+      .rpc('get_poll_results', { poll_id: sondageId });
     
     if (!error && data) {
       const sondage = sondages.find(s => s.id === sondageId);
       if (!sondage) return;
       
-      const total = data.length;
-      const counts = new Array(sondage.options.length).fill(0);
+      // Initialize all options with 0%
+      const percentages = new Array(sondage.options.length).fill(0);
       
-      data.forEach(vote => {
-        counts[vote.option_index]++;
+      // Update with actual results
+      data.forEach((result: { option_index: number; percentage: number }) => {
+        percentages[result.option_index] = result.percentage;
       });
-      
-      const percentages = counts.map(count => 
-        total > 0 ? Math.round((count / total) * 100) : 0
-      );
       
       setResults(prev => ({ ...prev, [sondageId]: percentages }));
     }

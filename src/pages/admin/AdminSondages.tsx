@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus, X } from 'lucide-react';
+import { z } from 'zod';
 
 interface Sondage {
   id: string;
@@ -15,6 +16,12 @@ interface Sondage {
   options: string[];
   active: boolean;
 }
+
+const sondageSchema = z.object({
+  question: z.string().trim().min(1, "La question est requise").max(500, "La question ne peut pas dépasser 500 caractères"),
+  options: z.array(z.string().trim().min(1, "Les options ne peuvent pas être vides").max(200, "Une option ne peut pas dépasser 200 caractères")).min(2, "Au moins 2 options sont requises").max(10, "Maximum 10 options"),
+  active: z.boolean()
+});
 
 const AdminSondages = () => {
   const [sondages, setSondages] = useState<Sondage[]>([]);
@@ -52,8 +59,12 @@ const AdminSondages = () => {
     e.preventDefault();
     
     const validOptions = formData.options.filter(o => o.trim() !== '');
-    if (validOptions.length < 2) {
-      toast({ title: 'Erreur', description: 'Au moins 2 options sont requises', variant: 'destructive' });
+    
+    // Validate input
+    const validation = sondageSchema.safeParse({ ...formData, options: validOptions });
+    if (!validation.success) {
+      const errors = validation.error.errors.map(e => e.message).join(', ');
+      toast({ title: 'Validation échouée', description: errors, variant: 'destructive' });
       return;
     }
     
