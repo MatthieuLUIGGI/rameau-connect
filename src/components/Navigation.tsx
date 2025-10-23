@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Wrench, Users, Newspaper, BarChart3, Settings, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Home, Wrench, Users, Newspaper, BarChart3, Mail, Settings, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -23,6 +23,7 @@ const Navigation = () => {
     { path: "/assemblee", label: "Assemblée", icon: Users },
     { path: "/actualites", label: "Actualités", icon: Newspaper },
     { path: "/sondages", label: "Sondages", icon: BarChart3 },
+    { path: "/contact", label: "Contact", icon: Mail },
   ];
 
   const isActive = (path: string) => location.pathname === path;
