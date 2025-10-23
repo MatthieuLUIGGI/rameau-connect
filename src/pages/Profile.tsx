@@ -6,15 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useNavigate } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -79,6 +87,82 @@ const Profile = () => {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setChangingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "Mot de passe modifié",
+      });
+
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le mot de passe",
+        variant: "destructive",
+      });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+
+    try {
+      const { error } = await supabase.functions.invoke('delete-account');
+
+      if (error) throw error;
+
+      toast({
+        title: "Compte supprimé",
+        description: "Votre compte a été supprimé avec succès",
+      });
+
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le compte",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 pt-24 pb-16 flex items-center justify-center min-h-screen">
@@ -89,58 +173,137 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto px-4 pt-24 pb-16">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Mon Profil</CardTitle>
-          <CardDescription>
-            Gérez vos informations personnelles
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={user?.email || ""}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-sm text-muted-foreground">
-                L'email ne peut pas être modifié
-              </p>
-            </div>
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Mon Profil</CardTitle>
+            <CardDescription>
+              Gérez vos informations personnelles
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-sm text-muted-foreground">
+                  L'email ne peut pas être modifié
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="firstName">Prénom</Label>
-              <Input
-                id="firstName"
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Votre prénom"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstName">Prénom</Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Votre prénom"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Nom</Label>
-              <Input
-                id="lastName"
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Votre nom"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Nom</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Votre nom"
+                />
+              </div>
 
-            <Button type="submit" disabled={saving} className="w-full">
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enregistrer
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <Button type="submit" disabled={saving} className="w-full">
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Enregistrer
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Changer le mot de passe</CardTitle>
+            <CardDescription>
+              Modifiez votre mot de passe
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Au moins 6 caractères"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirmez votre mot de passe"
+                />
+              </div>
+
+              <Button type="submit" disabled={changingPassword} className="w-full">
+                {changingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Changer le mot de passe
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">Zone dangereuse</CardTitle>
+            <CardDescription>
+              Actions irréversibles sur votre compte
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Supprimer mon compte
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action est irréversible. Votre compte et toutes vos données seront définitivement supprimés.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deletingAccount && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Supprimer définitivement
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
