@@ -8,6 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { z } from 'zod';
+
+const passwordSchema = z.string()
+  .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+  .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une lettre majuscule")
+  .regex(/[a-z]/, "Le mot de passe doit contenir au moins une lettre minuscule")
+  .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
+  .regex(/[^A-Za-z0-9]/, "Le mot de passe doit contenir au moins un caractère spécial");
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -32,6 +40,18 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Validate password for both login and signup
+      const passwordValidation = passwordSchema.safeParse(password);
+      if (!passwordValidation.success) {
+        toast({
+          title: 'Mot de passe invalide',
+          description: passwordValidation.error.errors[0].message,
+          variant: 'destructive'
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) throw error;
@@ -164,6 +184,9 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  <p className="text-xs text-muted-foreground">
+                    8+ caractères, incluant majuscule, minuscule, chiffre et caractère spécial
+                  </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Inscription...' : "S'inscrire"}

@@ -10,6 +10,14 @@ import { Loader2, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { z } from "zod";
+
+const passwordSchema = z.string()
+  .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+  .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une lettre majuscule")
+  .regex(/[a-z]/, "Le mot de passe doit contenir au moins une lettre minuscule")
+  .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
+  .regex(/[^A-Za-z0-9]/, "Le mot de passe doit contenir au moins un caractère spécial");
 
 const Profile = () => {
   const { user } = useAuth();
@@ -99,10 +107,12 @@ const Profile = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
+    // Validate password strength
+    const passwordValidation = passwordSchema.safeParse(newPassword);
+    if (!passwordValidation.success) {
       toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 6 caractères",
+        title: "Mot de passe invalide",
+        description: passwordValidation.error.errors[0].message,
         variant: "destructive",
       });
       return;
@@ -243,8 +253,11 @@ const Profile = () => {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Au moins 6 caractères"
+                  placeholder="••••••••"
                 />
+                <p className="text-xs text-muted-foreground">
+                  8+ caractères, incluant majuscule, minuscule, chiffre et caractère spécial
+                </p>
               </div>
 
               <div className="space-y-2">
