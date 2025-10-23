@@ -12,7 +12,7 @@ interface Membre {
   photo_url: string | null;
 }
 
-const Assemblee = () => {
+const Syndic = () => {
   const [membres, setMembres] = useState<Membre[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -52,10 +52,10 @@ const Assemblee = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-            Assemblée Générale
+            Conseil Syndical
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Découvrez les membres du bureau et du conseil syndical de la copropriété Le Rameau
+            Découvrez les membres du conseil syndical de la copropriété Le Rameau
           </p>
         </div>
 
@@ -119,23 +119,23 @@ const Assemblee = () => {
 
         {membres.length === 0 && (
           <div className="text-center text-muted-foreground">
-            Aucun membre de l'assemblée pour le moment.
+            Aucun membre du conseil syndical pour le moment.
           </div>
         )}
 
         {/* Info Section */}
         <div className="mt-16 p-8 bg-secondary rounded-lg animate-fade-in" style={{ animationDelay: "600ms" }}>
           <h3 className="text-2xl font-bold mb-4 text-center text-foreground">
-            Rôle de l'Assemblée Générale
+            Rôle du Conseil Syndical
           </h3>
           <div className="max-w-3xl mx-auto text-muted-foreground space-y-3">
             <p>
-              L'assemblée générale est l'organe décisionnel de la copropriété. Elle se réunit au moins 
-              une fois par an pour prendre les décisions importantes concernant la gestion de l'immeuble.
-            </p>
-            <p>
               Le conseil syndical, élu par l'assemblée générale, assiste et contrôle le syndic dans 
               sa gestion courante de la copropriété.
+            </p>
+            <p>
+              Il veille à l'exécution des décisions prises en assemblée générale et peut donner son 
+              avis sur toutes les questions relatives à la copropriété.
             </p>
           </div>
         </div>
@@ -144,4 +144,4 @@ const Assemblee = () => {
   );
 };
 
-export default Assemblee;
+export default Syndic;

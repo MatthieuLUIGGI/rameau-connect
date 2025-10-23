@@ -59,6 +59,7 @@ export type Database = {
           id: string
           name: string
           phone: string | null
+          type: string
           updated_at: string | null
         }
         Insert: {
@@ -69,6 +70,7 @@ export type Database = {
           id?: string
           name: string
           phone?: string | null
+          type?: string
           updated_at?: string | null
         }
         Update: {
@@ -79,6 +81,37 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      comptes_rendus_ag: {
+        Row: {
+          author_id: string | null
+          created_at: string | null
+          date: string
+          file_url: string
+          id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string | null
+          date: string
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string | null
+          date?: string
+          file_url?: string
+          id?: string
+          title?: string
           updated_at?: string | null
         }
         Relationships: []

@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Artisan {
   id: string;
   name: string;
   domain: string;
+  type: string;
   phone: string | null;
   email: string | null;
   description: string | null;
@@ -16,6 +18,7 @@ interface Artisan {
 const Artisans = () => {
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState<string>("Tous");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,6 +39,14 @@ const Artisans = () => {
     setIsLoading(false);
   };
 
+  // Get unique types for filters
+  const artisanTypes = ["Tous", ...Array.from(new Set(artisans.map(a => a.type)))];
+
+  // Filter artisans based on selected type
+  const filteredArtisans = selectedType === "Tous" 
+    ? artisans 
+    : artisans.filter(a => a.type === selectedType);
+
   if (isLoading) {
     return (
       <div className="min-h-screen pt-24 flex items-center justify-center">
@@ -47,22 +58,35 @@ const Artisans = () => {
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12 animate-fade-in">
+        <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-            Artisans Partenaires
+            Artisans Intervenants
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Découvrez nos artisans et prestataires de confiance recommandés par la copropriété
+            Artisans intervenants dans la copropriété Le Rameau
           </p>
         </div>
 
-        {artisans.length === 0 ? (
+        {/* Filter Tabs */}
+        <div className="flex justify-center mb-8">
+          <Tabs value={selectedType} onValueChange={setSelectedType} className="w-full max-w-3xl">
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${artisanTypes.length}, minmax(0, 1fr))` }}>
+              {artisanTypes.map((type) => (
+                <TabsTrigger key={type} value={type}>
+                  {type}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {filteredArtisans.length === 0 ? (
           <div className="text-center text-muted-foreground">
-            Aucun artisan partenaire pour le moment.
+            Aucun artisan pour ce type.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {artisans.map((artisan, index) => (
+            {filteredArtisans.map((artisan, index) => (
               <Card 
                 key={artisan.id} 
                 className="hover-lift border-border"
@@ -76,6 +100,7 @@ const Artisans = () => {
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1 text-foreground">{artisan.name}</CardTitle>
                       <p className="text-sm text-muted-foreground">{artisan.domain}</p>
+                      <p className="text-xs text-muted-foreground mt-1 font-medium">{artisan.type}</p>
                     </div>
                   </div>
                 </CardHeader>

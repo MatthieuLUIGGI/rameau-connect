@@ -20,8 +20,9 @@ const Navigation = () => {
   const navItems = [
     { path: "/", label: "Accueil", icon: Home },
     { path: "/artisans", label: "Artisans", icon: Wrench },
-    { path: "/assemblee", label: "Assemblée", icon: Users },
+    { path: "/syndic", label: "Syndic", icon: Users },
     { path: "/actualites", label: "Actualités", icon: Newspaper },
+    { path: "/ag", label: "AG", icon: BarChart3 },
     { path: "/sondages", label: "Sondages", icon: BarChart3 },
     { path: "/contact", label: "Contact", icon: Mail },
   ];
@@ -76,7 +77,10 @@ const Navigation = () => {
                         <Link to="/admin/artisans">Gérer les artisans</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/admin/assemblee">Gérer l'assemblée</Link>
+                        <Link to="/admin/syndic">Gérer le syndic</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/ag">Gérer les AG</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/admin/actualites">Gérer les actualités</Link>

@@ -14,6 +14,7 @@ interface Artisan {
   id: string;
   name: string;
   domain: string;
+  type: string;
   phone: string | null;
   email: string | null;
   description: string | null;
@@ -22,6 +23,7 @@ interface Artisan {
 const artisanSchema = z.object({
   name: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères"),
   domain: z.string().trim().min(1, "Le domaine est requis").max(100, "Le domaine ne peut pas dépasser 100 caractères"),
+  type: z.string().trim().min(1, "Le type est requis").max(50, "Le type ne peut pas dépasser 50 caractères"),
   phone: z.string().trim().max(20, "Le téléphone ne peut pas dépasser 20 caractères").optional().or(z.literal('')),
   email: z.string().trim().email("Email invalide").max(255, "L'email ne peut pas dépasser 255 caractères").optional().or(z.literal('')),
   description: z.string().trim().max(1000, "La description ne peut pas dépasser 1000 caractères").optional().or(z.literal(''))
@@ -34,6 +36,7 @@ const AdminArtisans = () => {
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
+    type: 'Plomberie',
     phone: '',
     email: '',
     description: ''
@@ -113,7 +116,7 @@ const AdminArtisans = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', domain: '', phone: '', email: '', description: '' });
+    setFormData({ name: '', domain: '', type: 'Plomberie', phone: '', email: '', description: '' });
     setEditingArtisan(null);
     setIsOpen(false);
   };
@@ -123,6 +126,7 @@ const AdminArtisans = () => {
     setFormData({
       name: artisan.name,
       domain: artisan.domain,
+      type: artisan.type,
       phone: artisan.phone || '',
       email: artisan.email || '',
       description: artisan.description || ''
@@ -162,6 +166,16 @@ const AdminArtisans = () => {
                   value={formData.domain}
                   onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                   placeholder="Plomberie, Électricité, etc."
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type">Type *</Label>
+                <Input
+                  id="type"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  placeholder="Plomberie, Électricité, Chauffage, etc."
                   required
                 />
               </div>
@@ -215,6 +229,7 @@ const AdminArtisans = () => {
                 <div>
                   <CardTitle>{artisan.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">{artisan.domain}</p>
+                  <p className="text-xs text-muted-foreground font-medium">{artisan.type}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button size="icon" variant="ghost" onClick={() => openEditDialog(artisan)}>

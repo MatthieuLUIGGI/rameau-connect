@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar, ChevronRight } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Calendar, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Actualite {
@@ -16,7 +16,6 @@ interface Actualite {
 
 const Actualites = () => {
   const [actualites, setActualites] = useState<Actualite[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Actualite | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -46,53 +45,15 @@ const Actualites = () => {
     );
   }
 
-  if (selectedArticle) {
-    return (
-      <div className="min-h-screen pt-24 pb-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <Button 
-            variant="ghost" 
-            onClick={() => setSelectedArticle(null)}
-            className="mb-6"
-          >
-            ← Retour aux actualités
-          </Button>
-          
-          <article className="animate-fade-in">
-            {selectedArticle.image_url && (
-              <img 
-                src={selectedArticle.image_url} 
-                alt={selectedArticle.title}
-                className="w-full h-96 object-cover rounded-lg mb-6"
-              />
-            )}
-            
-            <div className="mb-6">
-              <h1 className="text-4xl font-bold mb-4 text-foreground">{selectedArticle.title}</h1>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{new Date(selectedArticle.published_at).toLocaleDateString('fr-FR')}</span>
-              </div>
-            </div>
-            
-            <div className="prose prose-lg max-w-none">
-              <p className="text-foreground leading-relaxed whitespace-pre-wrap">{selectedArticle.content}</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen pt-24 pb-12">
+    <div className="min-h-screen pt-24 pb-12 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
             Actualités
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Restez informé des dernières nouvelles et événements de la copropriété
+            Restez informé des dernières nouvelles de la copropriété
           </p>
         </div>
 
@@ -101,40 +62,69 @@ const Actualites = () => {
             Aucune actualité pour le moment.
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto space-y-6">
+          <div className="max-w-2xl mx-auto space-y-4">
             {actualites.map((article, index) => (
               <Card 
                 key={article.id} 
-                className="hover-lift cursor-pointer border-border"
-                onClick={() => setSelectedArticle(article)}
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="p-6 hover-lift border-border bg-card"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                {article.image_url && (
-                  <div className="w-full h-48 overflow-hidden rounded-t-lg">
-                    <img 
-                      src={article.image_url} 
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(article.published_at).toLocaleDateString('fr-FR')}</span>
+                {/* Thread Header */}
+                <div className="flex items-start gap-4 mb-4">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-foreground">Syndic Le Rameau</p>
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>{new Date(article.published_at).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}</span>
                       </div>
-                      <CardTitle className="text-2xl mb-2 text-foreground">{article.title}</CardTitle>
                     </div>
-                    <ChevronRight className="h-6 w-6 text-muted-foreground flex-shrink-0" />
                   </div>
-                </CardHeader>
-                {article.excerpt && (
-                  <CardContent>
-                    <p className="text-muted-foreground">{article.excerpt}</p>
-                  </CardContent>
-                )}
+                </div>
+
+                {/* Thread Content */}
+                <div className="space-y-3">
+                  <h2 className="text-xl font-bold text-foreground leading-tight">
+                    {article.title}
+                  </h2>
+                  
+                  {article.excerpt && (
+                    <p className="text-muted-foreground leading-relaxed">
+                      {article.excerpt}
+                    </p>
+                  )}
+                  
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                    {article.content}
+                  </p>
+                  
+                  {article.image_url && (
+                    <div className="mt-4 rounded-lg overflow-hidden border border-border">
+                      <img 
+                        src={article.image_url} 
+                        alt={article.title}
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Thread Footer - Interactions */}
+                <div className="mt-4 pt-4 border-t border-border flex items-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium">Copropriété Le Rameau</span>
+                  </div>
+                </div>
               </Card>
             ))}
           </div>
