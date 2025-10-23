@@ -18,7 +18,6 @@ import AdminAssemblee from "./pages/admin/AdminAssemblee";
 import AdminActualites from "./pages/admin/AdminActualites";
 import AdminSondages from "./pages/admin/AdminSondages";
 import Contact from "./pages/Contact";
-import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,7 +40,6 @@ const App = () => (
                 <Route path="/actualites" element={<ProtectedRoute><Actualites /></ProtectedRoute>} />
                 <Route path="/sondages" element={<ProtectedRoute><Sondages /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/admin/artisans" element={<ProtectedRoute requireAG><AdminArtisans /></ProtectedRoute>} />
                 <Route path="/admin/assemblee" element={<ProtectedRoute requireAG><AdminAssemblee /></ProtectedRoute>} />
                 <Route path="/admin/actualites" element={<ProtectedRoute requireAG><AdminActualites /></ProtectedRoute>} />
