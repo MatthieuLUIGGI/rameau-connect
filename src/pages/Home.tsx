@@ -81,7 +81,7 @@ const Home = () => {
               </Button>
             </Link>
             <Link to="/contact">
-              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 shadow-lg">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
                 Nous contacter
               </Button>
             </Link>
@@ -96,51 +96,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Quick Links Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12 animate-fade-in">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              Accès rapide
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Découvrez tous les services à votre disposition
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {quickLinks.map((link, index) => {
-              const Icon = link.icon;
-              return (
-                <Link 
-                  key={index} 
-                  to={link.href}
-                  className="group animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <Card className="h-full border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-gradient-to-br from-card to-card/50 backdrop-blur">
-                    <CardContent className="p-6">
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${link.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="h-7 w-7 text-foreground" />
-                      </div>
-                      <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
-                        {link.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-4">
-                        {link.description}
-                      </p>
-                      <div className="flex items-center text-primary text-sm font-medium group-hover:gap-2 transition-all">
-                        <span>En savoir plus</span>
-                        <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* Info Section with Enhanced Design */}
       <section className="relative py-20 overflow-hidden">

@@ -27,7 +27,7 @@ const Sondages = () => {
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: number }>({});
   const [results, setResults] = useState<{ [key: string]: number[] }>({});
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAG } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -149,6 +149,7 @@ const Sondages = () => {
             {sondages.map((sondage, index) => {
               const voted = hasVoted(sondage.id);
               const pollResults = results[sondage.id] || [];
+              const showResults = voted || isAG;
               
               return (
                 <Card 
@@ -160,7 +161,7 @@ const Sondages = () => {
                     <CardTitle className="text-xl text-foreground">{sondage.question}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {!voted ? (
+                    {!showResults ? (
                       <div className="space-y-4">
                         <RadioGroup
                           value={selectedOptions[sondage.id]?.toString()}
@@ -188,10 +189,18 @@ const Sondages = () => {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-accent mb-4">
-                          <CheckCircle2 className="h-5 w-5" />
-                          <span className="font-medium">Merci pour votre participation !</span>
-                        </div>
+                        {voted && (
+                          <div className="flex items-center gap-2 text-accent mb-4">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span className="font-medium">Merci pour votre participation !</span>
+                          </div>
+                        )}
+                        {isAG && !voted && (
+                          <div className="flex items-center gap-2 text-primary mb-4">
+                            <CheckCircle2 className="h-5 w-5" />
+                            <span className="font-medium">Résultats (vue AG)</span>
+                          </div>
+                        )}
                         
                         <div className="space-y-3">
                           {sondage.options.map((option, optIndex) => (
