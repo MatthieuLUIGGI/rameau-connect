@@ -3,47 +3,56 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import heroImage from "@/assets/hero-residence.jpg";
+
 const Home = () => {
-  const quickLinks = [{
-    icon: Wrench,
-    title: "Artisans",
-    description: "Trouvez des professionnels de confiance",
-    href: "/artisans",
-    color: "from-blue-500/20 to-cyan-500/20"
-  }, {
-    icon: Users,
-    title: "Conseil Syndical",
-    description: "Découvrez vos représentants",
-    href: "/syndic",
-    color: "from-purple-500/20 to-pink-500/20"
-  }, {
-    icon: Newspaper,
-    title: "Actualités",
-    description: "Les dernières nouvelles",
-    href: "/actualites",
-    color: "from-orange-500/20 to-red-500/20"
-  }, {
-    icon: FileText,
-    title: "Assemblées",
-    description: "Comptes rendus des AG",
-    href: "/ag",
-    color: "from-green-500/20 to-emerald-500/20"
-  }];
-  return <div className="min-h-screen">
+  const quickLinks = [
+    {
+      icon: Wrench,
+      title: "Artisans",
+      description: "Trouvez des professionnels de confiance",
+      href: "/artisans",
+      color: "from-blue-500/20 to-cyan-500/20"
+    },
+    {
+      icon: Users,
+      title: "Conseil Syndical",
+      description: "Découvrez vos représentants",
+      href: "/syndic",
+      color: "from-purple-500/20 to-pink-500/20"
+    },
+    {
+      icon: Newspaper,
+      title: "Actualités",
+      description: "Les dernières nouvelles",
+      href: "/actualites",
+      color: "from-orange-500/20 to-red-500/20"
+    },
+    {
+      icon: FileText,
+      title: "Assemblées",
+      description: "Comptes rendus des AG",
+      href: "/ag",
+      color: "from-green-500/20 to-emerald-500/20"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen">
       {/* Hero Section with Enhanced Animations */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         {/* Background Image with Parallax Effect */}
-        <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" style={{
-        backgroundImage: `url(${heroImage})`
-      }}>
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
+          style={{ 
+            backgroundImage: `url(${heroImage})`,
+          }}
+        >
           <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/70 to-background/95"></div>
           
           {/* Animated Overlay Shapes */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-20 left-10 w-72 h-72 bg-primary-foreground/5 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-foreground/5 rounded-full blur-3xl animate-pulse" style={{
-            animationDelay: "1s"
-          }}></div>
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-foreground/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
           </div>
         </div>
         
@@ -58,17 +67,13 @@ const Home = () => {
           </h1>
           
           {/* Subtitle */}
-          <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 leading-relaxed max-w-3xl mx-auto mb-8 animate-fade-in" style={{
-          animationDelay: "200ms"
-        }}>
+          <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 leading-relaxed max-w-3xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
             Votre plateforme centrale pour suivre l'actualité, découvrir nos partenaires 
             et participer activement à la vie de notre résidence.
           </p>
           
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{
-          animationDelay: "400ms"
-        }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: "400ms" }}>
             <Link to="/actualites">
               <Button size="lg" className="group bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg hover:shadow-xl transition-all duration-300">
                 Voir les actualités
@@ -103,9 +108,42 @@ const Home = () => {
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6 animate-pulse">
+              <Users className="h-8 w-8 text-primary" />
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground animate-fade-in">
+              Une résidence à votre écoute
+            </h2>
+            
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8 animate-fade-in" style={{ animationDelay: "100ms" }}>
+              Le conseil syndical et la gestion de la copropriété Le Rameau sont à votre disposition 
+              pour garantir le bon fonctionnement de notre résidence. Nous sommes déterminés à maintenir 
+              un cadre de vie agréable et convivial pour tous.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+              {[
+                { number: "24/7", label: "Disponibilité" },
+                { number: "100%", label: "Engagement" },
+                { number: "1", label: "Communauté" }
+              ].map((stat, index) => (
+                <div 
+                  key={index} 
+                  className="animate-fade-in p-6 rounded-lg bg-background/50 backdrop-blur border border-border hover:border-primary/50 transition-all hover:scale-105"
+                  style={{ animationDelay: `${200 + index * 100}ms` }}
+                >
+                  <div className="text-4xl font-bold text-primary mb-2">{stat.number}</div>
+                  <div className="text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
-    </div>;
+    </div>
+  );
 };
+
 export default Home;
