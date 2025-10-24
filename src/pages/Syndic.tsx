@@ -62,8 +62,8 @@ const Syndic = () => {
         {/* Bureau Section */}
         {bureau.length > 0 && (
           <div className="mb-16 animate-slide-up">
-            <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Bureau de l'Assemblée</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-foreground px-4">Bureau du conseil syndical</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto px-4">
               {bureau.map((member, index) => (
                 <Card 
                   key={member.id} 
@@ -90,8 +90,8 @@ const Syndic = () => {
         {/* Conseil Syndical Section */}
         {conseil.length > 0 && (
           <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
-            <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Conseil Syndical</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-foreground px-4">Conseil Syndical</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
               {conseil.map((member, index) => (
                 <Card 
                   key={member.id} 
@@ -124,11 +124,11 @@ const Syndic = () => {
         )}
 
         {/* Info Section */}
-        <div className="mt-16 p-8 bg-secondary rounded-lg animate-fade-in" style={{ animationDelay: "600ms" }}>
-          <h3 className="text-2xl font-bold mb-4 text-center text-foreground">
+        <div className="mt-16 p-6 md:p-8 bg-secondary rounded-lg animate-fade-in mx-4" style={{ animationDelay: "600ms" }}>
+          <h3 className="text-xl md:text-2xl font-bold mb-4 text-center text-foreground">
             Rôle du Conseil Syndical
           </h3>
-          <div className="max-w-3xl mx-auto text-muted-foreground space-y-3">
+          <div className="max-w-3xl mx-auto text-muted-foreground space-y-3 text-sm md:text-base">
             <p>
               Le conseil syndical, élu par l'assemblée générale, assiste et contrôle le syndic dans 
               sa gestion courante de la copropriété.

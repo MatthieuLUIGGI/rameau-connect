@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Mail, Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Artisan {
   id: string;
@@ -67,17 +67,22 @@ const Artisans = () => {
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex justify-center mb-8">
-          <Tabs value={selectedType} onValueChange={setSelectedType} className="w-full max-w-3xl">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${artisanDomains.length}, minmax(0, 1fr))` }}>
-              {artisanDomains.map((domain) => (
-                <TabsTrigger key={domain} value={domain}>
-                  {domain}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        {/* Filter Dropdown */}
+        <div className="flex justify-center mb-8 px-4">
+          <div className="w-full max-w-xs">
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filtrer par domaine" />
+              </SelectTrigger>
+              <SelectContent>
+                {artisanDomains.map((domain) => (
+                  <SelectItem key={domain} value={domain}>
+                    {domain}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {filteredArtisans.length === 0 ? (
