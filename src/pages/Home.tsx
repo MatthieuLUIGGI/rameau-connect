@@ -58,12 +58,6 @@ const Home = () => {
         
         {/* Hero Content */}
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          {/* Welcome Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 animate-fade-in">
-            <Sparkles className="h-4 w-4 text-primary-foreground animate-pulse" />
-            <span className="text-sm font-medium text-primary-foreground">Bienvenue dans votre espace copropriété</span>
-          </div>
-          
           {/* Main Title with Staggered Animation */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in">
             <span className="block mb-2">La Copropriété</span>
