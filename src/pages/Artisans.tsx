@@ -39,13 +39,13 @@ const Artisans = () => {
     setIsLoading(false);
   };
 
-  // Get unique types for filters
-  const artisanTypes = ["Tous", ...Array.from(new Set(artisans.map(a => a.type)))];
+  // Get unique domains for filters
+  const artisanDomains = ["Tous", ...Array.from(new Set(artisans.map(a => a.domain)))];
 
-  // Filter artisans based on selected type
+  // Filter artisans based on selected domain
   const filteredArtisans = selectedType === "Tous" 
     ? artisans 
-    : artisans.filter(a => a.type === selectedType);
+    : artisans.filter(a => a.domain === selectedType);
 
   if (isLoading) {
     return (
@@ -70,10 +70,10 @@ const Artisans = () => {
         {/* Filter Tabs */}
         <div className="flex justify-center mb-8">
           <Tabs value={selectedType} onValueChange={setSelectedType} className="w-full max-w-3xl">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${artisanTypes.length}, minmax(0, 1fr))` }}>
-              {artisanTypes.map((type) => (
-                <TabsTrigger key={type} value={type}>
-                  {type}
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${artisanDomains.length}, minmax(0, 1fr))` }}>
+              {artisanDomains.map((domain) => (
+                <TabsTrigger key={domain} value={domain}>
+                  {domain}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -100,7 +100,6 @@ const Artisans = () => {
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1 text-foreground">{artisan.name}</CardTitle>
                       <p className="text-sm text-muted-foreground">{artisan.domain}</p>
-                      <p className="text-xs text-muted-foreground mt-1 font-medium">{artisan.type}</p>
                     </div>
                   </div>
                 </CardHeader>
