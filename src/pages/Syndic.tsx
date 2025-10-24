@@ -50,11 +50,11 @@ const Syndic = () => {
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+        <div className="text-center mb-8 md:mb-12 animate-fade-in px-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
             Conseil Syndical
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Découvrez les membres du conseil syndical de la copropriété Le Rameau
           </p>
         </div>

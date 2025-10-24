@@ -137,6 +137,79 @@ const Navigation = () => {
                 </Link>
               );
             })}
+            
+            <div className="pt-2 border-t border-border mt-2">
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <User className="h-5 w-5" />
+                    <span className="font-medium">Mon profil</span>
+                  </Link>
+                  {isAG && (
+                    <>
+                      <Link
+                        to="/admin/artisans"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Gérer les artisans</span>
+                      </Link>
+                      <Link
+                        to="/admin/syndic"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Gérer le syndic</span>
+                      </Link>
+                      <Link
+                        to="/admin/ag"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Gérer les AG</span>
+                      </Link>
+                      <Link
+                        to="/admin/actualites"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Gérer les actualités</span>
+                      </Link>
+                      <Link
+                        to="/admin/sondages"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Gérer les sondages</span>
+                      </Link>
+                    </>
+                  )}
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span className="font-medium">Déconnexion</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <LogIn className="h-5 w-5" />
+                  <span className="font-medium">Connexion</span>
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>

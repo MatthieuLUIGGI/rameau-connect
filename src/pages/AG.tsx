@@ -50,22 +50,24 @@ const AG = () => {
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-12 animate-fade-in">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Assemblées Générales
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              Consultez les comptes rendus des assemblées générales de la copropriété
-            </p>
+        <div className="mb-8 md:mb-12 animate-fade-in">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 text-foreground">
+                Assemblées Générales
+              </h1>
+              <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
+                Consultez les comptes rendus des assemblées générales de la copropriété
+              </p>
+            </div>
+            {isAG && (
+              <Link to="/admin/ag" className="w-full md:w-auto">
+                <Button className="w-full md:w-auto">
+                  Gérer les comptes rendus
+                </Button>
+              </Link>
+            )}
           </div>
-          {isAG && (
-            <Link to="/admin/ag">
-              <Button>
-                Gérer les comptes rendus
-              </Button>
-            </Link>
-          )}
         </div>
 
         {comptesRendus.length === 0 ? (

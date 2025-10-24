@@ -131,11 +131,11 @@ const Sondages = () => {
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+        <div className="text-center mb-8 md:mb-12 animate-fade-in">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
             Sondages
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-4">
             Participez aux sondages et exprimez votre opinion sur les décisions de la copropriété
           </p>
         </div>

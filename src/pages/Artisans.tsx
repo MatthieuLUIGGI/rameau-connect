@@ -58,11 +58,11 @@ const Artisans = () => {
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+        <div className="text-center mb-8 animate-fade-in px-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
             Artisans Intervenants
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Artisans intervenants dans la copropriété Le Rameau
           </p>
         </div>
