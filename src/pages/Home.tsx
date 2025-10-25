@@ -2,7 +2,7 @@ import { Wrench, Users, Newspaper, FileText, ArrowRight, Sparkles } from "lucide
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import heroImage from "@/assets/hero-residence.jpg";
+import heroImage from "@/assets/hero-rameau.jpg";
 
 const Home = () => {
   const quickLinks = [
