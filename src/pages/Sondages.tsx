@@ -54,7 +54,7 @@ const Sondages = () => {
       
       // Fetch results for all polls
       formatted.forEach(sondage => {
-        fetchResults(sondage.id);
+        fetchResults(sondage.id, sondage.options.length);
       });
     }
     setIsLoading(false);
@@ -73,18 +73,15 @@ const Sondages = () => {
     }
   };
 
-  const fetchResults = async (sondageId: string) => {
+  const fetchResults = async (sondageId: string, optionsLength: number) => {
     // Use server-side aggregation function to get poll results
     // This prevents exposing individual voting patterns
     const { data, error } = await supabase
       .rpc('get_poll_results', { poll_id: sondageId });
     
     if (!error && data) {
-      const sondage = sondages.find(s => s.id === sondageId);
-      if (!sondage) return;
-      
       // Initialize all options with 0%
-      const percentages = new Array(sondage.options.length).fill(0);
+      const percentages = new Array(optionsLength).fill(0);
       
       // Update with actual results
       data.forEach((result: { option_index: number; percentage: number }) => {
@@ -111,7 +108,10 @@ const Sondages = () => {
     } else {
       toast({ title: 'Succès', description: 'Votre vote a été enregistré' });
       fetchUserVotes();
-      fetchResults(sondageId);
+      const sondage = sondages.find(s => s.id === sondageId);
+      if (sondage) {
+        fetchResults(sondageId, sondage.options.length);
+      }
     }
   };
 
@@ -160,7 +160,7 @@ const Sondages = () => {
                     <CardTitle className="text-xl text-foreground">{sondage.question}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {!showResults ? (
+                    {!showResults && !voted ? (
                       <div className="space-y-4">
                         <RadioGroup
                           value={selectedOptions[sondage.id]?.toString()}
@@ -185,6 +185,11 @@ const Sondages = () => {
                         >
                           Envoyer ma réponse
                         </Button>
+                      </div>
+                    ) : voted && !showResults ? (
+                      <div className="text-center py-4 text-muted-foreground">
+                        <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-accent" />
+                        <p>Vous avez déjà voté pour ce sondage</p>
                       </div>
                     ) : (
                       <div className="space-y-4">

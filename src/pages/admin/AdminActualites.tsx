@@ -4,12 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { z } from 'zod';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Actualite {
   id: string;
@@ -26,6 +27,16 @@ const actualiteSchema = z.object({
   content: z.string().trim().min(1, "Le contenu est requis").max(50000, "Le contenu ne peut pas dépasser 50000 caractères"),
   image_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal(''))
 });
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['link', 'image'],
+    ['clean']
+  ]
+};
 
 const AdminActualites = () => {
   const [actualites, setActualites] = useState<Actualite[]>([]);
@@ -140,7 +151,7 @@ const AdminActualites = () => {
               Ajouter une actualité
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingActualite ? 'Modifier' : 'Ajouter'} une actualité</DialogTitle>
             </DialogHeader>
@@ -173,13 +184,15 @@ const AdminActualites = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="content">Contenu *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={10}
-                  required
-                />
+                <div className="bg-background border rounded-md">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.content}
+                    onChange={(content) => setFormData({ ...formData, content })}
+                    modules={quillModules}
+                    className="min-h-[300px]"
+                  />
+                </div>
               </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={resetForm}>

@@ -159,3 +159,36 @@ All colors MUST be HSL.
     transform: translateY(0);
   }
 }
+
+/* React Quill Editor Styles */
+.ql-container {
+  @apply bg-background text-foreground;
+}
+
+.ql-editor {
+  @apply min-h-[300px] text-foreground;
+}
+
+.ql-toolbar {
+  @apply bg-muted border-border rounded-t-md;
+}
+
+.ql-snow .ql-stroke {
+  stroke: hsl(var(--foreground));
+}
+
+.ql-snow .ql-fill {
+  fill: hsl(var(--foreground));
+}
+
+.ql-snow .ql-picker-label {
+  color: hsl(var(--foreground));
+}
+
+.dark .ql-snow .ql-picker-options {
+  @apply bg-popover;
+}
+
+.dark .ql-snow .ql-tooltip {
+  @apply bg-popover border-border;
+}

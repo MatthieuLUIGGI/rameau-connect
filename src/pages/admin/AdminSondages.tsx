@@ -17,6 +17,10 @@ interface Sondage {
   active: boolean;
 }
 
+interface VoteCount {
+  [key: string]: number;
+}
+
 const sondageSchema = z.object({
   question: z.string().trim().min(1, "La question est requise").max(500, "La question ne peut pas dépasser 500 caractères"),
   options: z.array(z.string().trim().min(1, "Les options ne peuvent pas être vides").max(200, "Une option ne peut pas dépasser 200 caractères")).min(2, "Au moins 2 options sont requises").max(10, "Maximum 10 options"),
@@ -25,6 +29,7 @@ const sondageSchema = z.object({
 
 const AdminSondages = () => {
   const [sondages, setSondages] = useState<Sondage[]>([]);
+  const [voteCounts, setVoteCounts] = useState<VoteCount>({});
   const [isOpen, setIsOpen] = useState(false);
   const [editingSondage, setEditingSondage] = useState<Sondage | null>(null);
   const [formData, setFormData] = useState({
@@ -52,6 +57,18 @@ const AdminSondages = () => {
         options: s.options as string[]
       }));
       setSondages(formatted);
+      
+      // Fetch vote counts for each poll
+      formatted.forEach(async (sondage) => {
+        const { count } = await supabase
+          .from('votes')
+          .select('*', { count: 'exact', head: true })
+          .eq('sondage_id', sondage.id);
+        
+        if (count !== null) {
+          setVoteCounts(prev => ({ ...prev, [sondage.id]: count }));
+        }
+      });
     }
   };
 
@@ -231,6 +248,9 @@ const AdminSondages = () => {
                       </span>
                     )}
                   </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {voteCounts[sondage.id] || 0} votant{(voteCounts[sondage.id] || 0) !== 1 ? 's' : ''}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <Button size="icon" variant="ghost" onClick={() => openEditDialog(sondage)}>

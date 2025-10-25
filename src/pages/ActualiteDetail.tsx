@@ -115,11 +115,10 @@ const ActualiteDetail = () => {
               </div>
             )}
             
-            <div className="prose prose-lg max-w-none">
-              <p className="text-foreground leading-relaxed whitespace-pre-wrap text-base md:text-lg">
-                {actualite.content}
-              </p>
-            </div>
+            <div 
+              className="prose prose-lg max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: actualite.content }}
+            />
           </div>
 
           {/* Footer */}
