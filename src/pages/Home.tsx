@@ -114,14 +114,14 @@ const Home = () => {
               {
                 icon: Wrench,
                 title: "Artisans",
-                description: "Consultez notre liste de professionnels recommandés pour vos travaux",
+                description: "Consultez notre liste des artisans intervenants au Rameau",
                 href: "/artisans",
                 color: "from-blue-500/10 to-cyan-500/10"
               },
               {
                 icon: Users,
                 title: "Conseil Syndical",
-                description: "Rencontrez les membres du conseil syndical et le syndic",
+                description: "Membres du conseil syndical et le syndic",
                 href: "/syndic",
                 color: "from-purple-500/10 to-pink-500/10"
               },
@@ -149,7 +149,7 @@ const Home = () => {
               {
                 icon: Users,
                 title: "Contact",
-                description: "Besoin d'aide ? Contactez-nous directement",
+                description: "Contactez-nous directement",
                 href: "/contact",
                 color: "from-teal-500/10 to-green-500/10"
               }
