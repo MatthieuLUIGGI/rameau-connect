@@ -119,28 +119,37 @@ export type Database = {
       membres_assemblee: {
         Row: {
           created_at: string | null
+          address: string | null
+          email: string | null
           id: string
           level: number
           name: string
           photo_url: string | null
+          phone: string | null
           position: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          address?: string | null
+          email?: string | null
           id?: string
           level?: number
           name: string
           photo_url?: string | null
+          phone?: string | null
           position: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          address?: string | null
+          email?: string | null
           id?: string
           level?: number
           name?: string
           photo_url?: string | null
+          phone?: string | null
           position?: string
           updated_at?: string | null
         }

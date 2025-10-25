@@ -10,6 +10,9 @@ interface Membre {
   position: string;
   level: number;
   photo_url: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
 }
 
 const Syndic = () => {
@@ -63,11 +66,11 @@ const Syndic = () => {
         {bureau.length > 0 && (
           <div className="mb-16 animate-slide-up">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-foreground px-4">Le Syndic</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto px-4">
+            <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto px-4">
               {bureau.map((member, index) => (
                 <Card 
                   key={member.id} 
-                  className="hover-lift border-border"
+                  className="hover-lift border-border w-full sm:w-[22rem]"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <CardContent className="p-6 text-center">
@@ -80,6 +83,13 @@ const Syndic = () => {
                     </div>
                     <h3 className="text-xl font-semibold mb-1 text-foreground">{member.name}</h3>
                     <p className="text-muted-foreground font-medium">{member.position}</p>
+                    {(member.phone || member.email || member.address) && (
+                      <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+                        {member.phone && <p>Tél. {member.phone}</p>}
+                        {member.email && <p>{member.email}</p>}
+                        {member.address && <p>{member.address}</p>}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -109,6 +119,13 @@ const Syndic = () => {
                     <div>
                       <h3 className="text-lg font-semibold mb-1 text-foreground">{member.name}</h3>
                       <p className="text-sm text-muted-foreground">{member.position}</p>
+                      {(member.phone || member.email || member.address) && (
+                        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                          {member.phone && <p>Tél. {member.phone}</p>}
+                          {member.email && <p>{member.email}</p>}
+                          {member.address && <p>{member.address}</p>}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

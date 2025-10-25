@@ -16,13 +16,19 @@ interface Membre {
   position: string;
   level: number;
   photo_url: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
 }
 
 const membreSchema = z.object({
   name: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères"),
   position: z.string().trim().min(1, "La fonction est requise").max(100, "La fonction ne peut pas dépasser 100 caractères"),
   level: z.number().int().min(1).max(2),
-  photo_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal(''))
+  photo_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal('')),
+  phone: z.string().trim().max(50, "Téléphone trop long").optional().or(z.literal('')),
+  email: z.string().trim().email("Email invalide").optional().or(z.literal('')),
+  address: z.string().trim().max(255, "Adresse trop longue").optional().or(z.literal(''))
 });
 
 const AdminAssemblee = () => {
@@ -33,7 +39,10 @@ const AdminAssemblee = () => {
     name: '',
     position: '',
     level: 1,
-    photo_url: ''
+    photo_url: '',
+    phone: '',
+    email: '',
+    address: ''
   });
   const { toast } = useToast();
 
@@ -111,7 +120,7 @@ const AdminAssemblee = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', position: '', level: 1, photo_url: '' });
+    setFormData({ name: '', position: '', level: 1, photo_url: '', phone: '', email: '', address: '' });
     setEditingMembre(null);
     setIsOpen(false);
   };
@@ -122,7 +131,10 @@ const AdminAssemblee = () => {
       name: membre.name,
       position: membre.position,
       level: membre.level,
-      photo_url: membre.photo_url || ''
+      photo_url: membre.photo_url || '',
+      phone: membre.phone || '',
+      email: membre.email || '',
+      address: membre.address || ''
     });
     setIsOpen(true);
   };
@@ -183,6 +195,36 @@ const AdminAssemblee = () => {
                   onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
                 />
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Téléphone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="Ex: 06 12 34 56 78"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="prenom.nom@example.com"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Adresse</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="N°, rue, code postal, ville"
+                />
+              </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Annuler
@@ -209,6 +251,13 @@ const AdminAssemblee = () => {
                     <CardTitle>{membre.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">{membre.position}</p>
                     <p className="text-xs text-muted-foreground">Niveau {membre.level}</p>
+                    {(membre.phone || membre.email || membre.address) && (
+                      <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        {membre.phone && <p>Tél. {membre.phone}</p>}
+                        {membre.email && <p>Email: {membre.email}</p>}
+                        {membre.address && <p>Adresse: {membre.address}</p>}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
