@@ -7,9 +7,6 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-semibold mb-4">Copropriété Le Rameau</h3>
-            <p className="text-primary-foreground/80 text-sm leading-relaxed">
-              Un lieu de vie agréable et convivial au cœur de la ville.
-            </p>
           </div>
 
           <div>
@@ -18,16 +15,12 @@ const Footer = () => {
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span className="text-primary-foreground/80">
-                  123 Avenue du Rameau<br />75000 Paris
+                  5 Rue André Malraux<br />21000 Dijon
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 flex-shrink-0" />
-                <span className="text-primary-foreground/80">01 23 45 67 89</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 flex-shrink-0" />
-                <span className="text-primary-foreground/80">contact@lerameau.fr</span>
+                <span className="text-primary-foreground/80">residence.lerameau@laposte.net</span>
               </div>
             </div>
           </div>
@@ -36,7 +29,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Horaires du syndic</h3>
             <div className="space-y-2 text-sm text-primary-foreground/80">
               <p>Lundi - Vendredi</p>
-              <p className="font-medium">9h00 - 12h30 / 14h00 - 18h00</p>
+              <p className="font-medium">10h00 - 12h00 / 14h00 - 17h00</p>
             </div>
           </div>
         </div>
