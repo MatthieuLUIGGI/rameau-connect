@@ -66,12 +66,6 @@ const Home = () => {
             </span>
           </h1>
           
-          {/* Subtitle */}
-          <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 leading-relaxed max-w-3xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            Votre plateforme centrale pour suivre l'actualité, découvrir nos partenaires 
-            et participer activement à la vie de notre résidence.
-          </p>
-          
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: "400ms" }}>
             <Link to="/actualites">
