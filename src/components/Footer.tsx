@@ -27,7 +27,7 @@ const Footer = () => {
 
           <div>
             <h3 className="text-lg font-semibold mb-4">Horaires du syndic</h3>
-            <p className="text-lg font-semibold mb-4">Régie Foncière</p>
+            <p>Régie Foncière</p>
             <div className="space-y-2 text-sm text-primary-foreground/80">
               <p>Lundi - Vendredi</p>
               <p className="font-medium">10h00 - 12h00 / 14h00 - 17h00</p>
