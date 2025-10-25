@@ -62,7 +62,7 @@ const Syndic = () => {
         {/* Bureau Section */}
         {bureau.length > 0 && (
           <div className="mb-16 animate-slide-up">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-foreground px-4">Bureau du conseil syndical</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-foreground px-4">Le Syndic</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto px-4">
               {bureau.map((member, index) => (
                 <Card 

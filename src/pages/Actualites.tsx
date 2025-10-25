@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Actualite {
@@ -66,8 +66,9 @@ const Actualites = () => {
             {actualites.map((article, index) => (
               <Card 
                 key={article.id} 
-                className="p-6 hover-lift border-border bg-card"
+                className="p-6 hover-lift border-border bg-card cursor-pointer transition-all duration-200 hover:shadow-lg"
                 style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => window.location.href = `/actualites/${article.id}`}
               >
                 {/* Thread Header */}
                 <div className="flex items-start gap-4 mb-4">
@@ -104,9 +105,14 @@ const Actualites = () => {
                     </p>
                   )}
                   
-                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                  <p className="text-foreground leading-relaxed line-clamp-3">
                     {article.content}
                   </p>
+                  
+                  <div className="flex items-center gap-2 text-primary font-medium mt-2">
+                    <span>Lire la suite</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
                   
                   {article.image_url && (
                     <div className="mt-4 rounded-lg overflow-hidden border border-border">

@@ -97,48 +97,82 @@ const Home = () => {
       </section>
 
 
-      {/* Info Section with Enhanced Design */}
-      <section className="relative py-20 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/95 to-secondary">
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent rounded-full blur-3xl"></div>
-          </div>
-        </div>
-
+      {/* Quick Access Section */}
+      <section className="relative py-20 overflow-hidden bg-muted/30">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6 animate-pulse">
-              <Users className="h-8 w-8 text-primary" />
-            </div>
-            
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground animate-fade-in">
-              Une résidence à votre écoute
+          <div className="text-center mb-12 animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              Accès rapides
             </h2>
-            
-            <p className="text-muted-foreground text-lg leading-relaxed mb-8 animate-fade-in" style={{ animationDelay: "100ms" }}>
-              Le conseil syndical et la gestion de la copropriété Le Rameau sont à votre disposition 
-              pour garantir le bon fonctionnement de notre résidence. Nous sommes déterminés à maintenir 
-              un cadre de vie agréable et convivial pour tous.
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Découvrez toutes les fonctionnalités de votre espace copropriété
             </p>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              {[
-                { number: "24/7", label: "Disponibilité" },
-                { number: "100%", label: "Engagement" },
-                { number: "1", label: "Communauté" }
-              ].map((stat, index) => (
-                <div 
-                  key={index} 
-                  className="animate-fade-in p-6 rounded-lg bg-background/50 backdrop-blur border border-border hover:border-primary/50 transition-all hover:scale-105"
-                  style={{ animationDelay: `${200 + index * 100}ms` }}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                icon: Wrench,
+                title: "Artisans",
+                description: "Consultez notre liste de professionnels recommandés pour vos travaux",
+                href: "/artisans",
+                color: "from-blue-500/10 to-cyan-500/10"
+              },
+              {
+                icon: Users,
+                title: "Conseil Syndical",
+                description: "Rencontrez les membres du conseil syndical et le syndic",
+                href: "/syndic",
+                color: "from-purple-500/10 to-pink-500/10"
+              },
+              {
+                icon: Newspaper,
+                title: "Actualités",
+                description: "Restez informé des dernières nouvelles de la copropriété",
+                href: "/actualites",
+                color: "from-orange-500/10 to-red-500/10"
+              },
+              {
+                icon: FileText,
+                title: "Assemblées Générales",
+                description: "Accédez aux comptes rendus des assemblées générales",
+                href: "/ag",
+                color: "from-green-500/10 to-emerald-500/10"
+              },
+              {
+                icon: Sparkles,
+                title: "Sondages",
+                description: "Participez aux sondages et exprimez votre opinion",
+                href: "/sondages",
+                color: "from-indigo-500/10 to-blue-500/10"
+              },
+              {
+                icon: Users,
+                title: "Contact",
+                description: "Besoin d'aide ? Contactez-nous directement",
+                href: "/contact",
+                color: "from-teal-500/10 to-green-500/10"
+              }
+            ].map((item, index) => (
+              <Link key={index} to={item.href}>
+                <Card 
+                  className="h-full hover-lift border-border transition-all duration-300 hover:border-primary/50 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="text-4xl font-bold text-primary mb-2">{stat.number}</div>
-                  <div className="text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
-            </div>
+                  <CardContent className="p-6">
+                    <div className={`w-14 h-14 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center mb-4`}>
+                      <item.icon className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2 text-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

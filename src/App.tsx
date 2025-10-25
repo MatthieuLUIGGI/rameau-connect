@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Artisans from "./pages/Artisans";
 import Syndic from "./pages/Syndic";
 import Actualites from "./pages/Actualites";
+import ActualiteDetail from "./pages/ActualiteDetail";
 import Sondages from "./pages/Sondages";
 import AG from "./pages/AG";
 import AdminArtisans from "./pages/admin/AdminArtisans";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/artisans" element={<ProtectedRoute><Artisans /></ProtectedRoute>} />
                 <Route path="/syndic" element={<ProtectedRoute><Syndic /></ProtectedRoute>} />
                 <Route path="/actualites" element={<ProtectedRoute><Actualites /></ProtectedRoute>} />
+                <Route path="/actualites/:id" element={<ProtectedRoute><ActualiteDetail /></ProtectedRoute>} />
                 <Route path="/ag" element={<ProtectedRoute><AG /></ProtectedRoute>} />
                 <Route path="/sondages" element={<ProtectedRoute><Sondages /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />

@@ -41,7 +41,6 @@ const Sondages = () => {
     const { data, error } = await supabase
       .from('sondages')
       .select('*')
-      .eq('active', true)
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -149,7 +148,7 @@ const Sondages = () => {
             {sondages.map((sondage, index) => {
               const voted = hasVoted(sondage.id);
               const pollResults = results[sondage.id] || [];
-              const showResults = voted || isAG;
+              const showResults = !sondage.active;
               
               return (
                 <Card 
@@ -189,18 +188,10 @@ const Sondages = () => {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {voted && (
-                          <div className="flex items-center gap-2 text-accent mb-4">
-                            <CheckCircle2 className="h-5 w-5" />
-                            <span className="font-medium">Merci pour votre participation !</span>
-                          </div>
-                        )}
-                        {isAG && !voted && (
-                          <div className="flex items-center gap-2 text-primary mb-4">
-                            <CheckCircle2 className="h-5 w-5" />
-                            <span className="font-medium">Résultats (vue AG)</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 text-accent mb-4">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span className="font-medium">Sondage terminé - Résultats</span>
+                        </div>
                         
                         <div className="space-y-3">
                           {sondage.options.map((option, optIndex) => (
