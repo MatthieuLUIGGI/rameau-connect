@@ -19,6 +19,23 @@ const Actualites = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Transforme le contenu HTML en texte brut pour l'aperçu (liste)
+  const toPlainText = (html: string) =>
+    html
+      .replace(/<[^>]*>/g, " ") // retire les balises
+      .replace(/&nbsp;|&amp;|&quot;|&lt;|&gt;/g, (m) => {
+        const map: Record<string, string> = {
+          "&nbsp;": " ",
+          "&amp;": "&",
+          "&quot;": '"',
+          "&lt;": "<",
+          "&gt;": ">",
+        };
+        return map[m] ?? " ";
+      })
+      .replace(/\s+/g, " ")
+      .trim();
+
   useEffect(() => {
     fetchActualites();
   }, []);
@@ -105,9 +122,12 @@ const Actualites = () => {
                     </p>
                   )}
                   
-                  <p className="text-foreground leading-relaxed line-clamp-3">
-                    {article.content}
-                  </p>
+                  {/* Aperçu du contenu: si pas d'extrait, on affiche le contenu converti en texte */}
+                  {!article.excerpt && (
+                    <p className="text-foreground leading-relaxed line-clamp-3">
+                      {toPlainText(article.content)}
+                    </p>
+                  )}
                   
                   <div className="flex items-center gap-2 text-primary font-medium mt-2">
                     <span>Lire la suite</span>

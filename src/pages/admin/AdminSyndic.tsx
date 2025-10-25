@@ -130,7 +130,7 @@ const AdminAssemblee = () => {
   return (
     <div className="container mx-auto px-4 py-24">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Gestion de l'Assemblée</h1>
+        <h1 className="text-4xl font-bold">Gestion du syndic</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsOpen(true); }}>
