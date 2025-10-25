@@ -1,0 +1,10 @@
+# services:
+#   - type: web
+#     name: rameau-connect
+#     env: static
+#     staticPublishPath: dist
+#     buildCommand: npm install && npm run build
+#     routes:
+#       - type: rewrite
+#         source: /*
+#         destination: /
