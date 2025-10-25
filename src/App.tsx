@@ -23,6 +23,7 @@ import AdminAG from "./pages/admin/AdminAG";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
               </Routes>
             </main>
             <Footer />
+            <Analytics />
           </div>
         </AuthProvider>
       </BrowserRouter>
