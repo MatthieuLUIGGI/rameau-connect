@@ -24,7 +24,7 @@ interface Actualite {
 const actualiteSchema = z.object({
   title: z.string().trim().min(1, "Le titre est requis").max(200, "Le titre ne peut pas dépasser 200 caractères"),
   excerpt: z.string().trim().max(500, "L'extrait ne peut pas dépasser 500 caractères").optional(),
-  content: z.string().trim().min(1, "Le contenu est requis"),
+  content: z.string().trim().min(1, "Le contenu est requis").max(50000, "Le contenu ne peut pas dépasser 50000 caractères"),
   image_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal(''))
 });
 
