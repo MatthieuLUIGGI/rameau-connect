@@ -52,6 +52,7 @@ const AdminActualites = () => {
   });
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeletingFile, setIsDeletingFile] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -88,6 +89,7 @@ const AdminActualites = () => {
     
     // Upload du PDF si fourni
     let newFileUrl = editingActualite?.file_url || null;
+    const previousFileUrl = editingActualite?.file_url || null;
     if (file) {
       const uploadedUrl = await uploadFile(file);
       if (!uploadedUrl) {
@@ -106,6 +108,10 @@ const AdminActualites = () => {
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
+        // Si un nouveau fichier a été uploadé et qu'un ancien existait, on supprime l'ancien du storage
+        if (file && previousFileUrl && previousFileUrl !== newFileUrl) {
+          await deleteFileFromUrl(previousFileUrl);
+        }
         toast({ title: 'Succès', description: 'Actualité modifiée avec succès' });
         fetchActualites();
         resetForm();
@@ -227,6 +233,54 @@ const AdminActualites = () => {
     return publicUrl;
   };
 
+  const extractPathFromPublicUrl = (url: string): string | null => {
+    // URL typique: https://<project>.supabase.co/storage/v1/object/public/actualites-files/<path>
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/');
+      const publicIndex = parts.indexOf('public');
+      if (publicIndex === -1) return null;
+      // bucket = parts[publicIndex + 1] (doit être 'actualites-files')
+      // path = reste après le bucket
+      const pathParts = parts.slice(publicIndex + 2);
+      return pathParts.join('/');
+    } catch {
+      return null;
+    }
+  };
+
+  const deleteFileFromUrl = async (url: string) => {
+    const path = extractPathFromPublicUrl(url);
+    const filePath = path ? path : url.split('/').pop() || '';
+    if (!filePath) return;
+    await supabase.storage.from('actualites-files').remove([filePath]);
+  };
+
+  const handleRemoveExistingPdf = async () => {
+    if (!editingActualite || !editingActualite.file_url) return;
+    if (!confirm('Supprimer le PDF associé à cette actualité ?')) return;
+    try {
+      setIsDeletingFile(true);
+      await deleteFileFromUrl(editingActualite.file_url);
+      const { error } = await supabase
+        .from('actualites')
+        .update({ file_url: null } as any)
+        .eq('id', editingActualite.id);
+      if (error) {
+        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+        return;
+      }
+      // Mettre à jour l'état local (form + actualité en édition)
+      setFormData((prev) => ({ ...prev, file_url: '' }));
+      setEditingActualite({ ...editingActualite, file_url: null });
+      // Rafraîchir la liste pour refléter le changement
+      fetchActualites();
+      toast({ title: 'PDF supprimé', description: 'Le fichier a été supprimé avec succès.' });
+    } finally {
+      setIsDeletingFile(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-24">
       <div className="flex justify-between items-center mb-8">
@@ -289,9 +343,17 @@ const AdminActualites = () => {
                   )}
                 </div>
                 {formData.file_url && !file && (
-                  <p className="text-xs text-muted-foreground">
-                    Fichier actuel: <a href={formData.file_url} target="_blank" rel="noreferrer" className="underline">voir le PDF</a>
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <p>
+                      Fichier actuel: <a href={formData.file_url} target="_blank" rel="noreferrer" className="underline">voir le PDF</a>
+                    </p>
+                    {editingActualite && (
+                      <Button type="button" variant="outline" size="sm" onClick={handleRemoveExistingPdf} disabled={isDeletingFile}>
+                        {isDeletingFile ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
+                        Supprimer le PDF
+                      </Button>
+                    )}
+                  </div>
                 )}
                 <p className="text-xs text-muted-foreground">
                   Format PDF uniquement, taille maximale 10 MB
