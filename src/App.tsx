@@ -9,13 +9,13 @@ import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
-import Artisans from "./pages/Artisans";
+import BadgesVigik from "./pages/BadgesVigik";
 import Syndic from "./pages/Syndic";
 import Actualites from "./pages/Actualites";
 import ActualiteDetail from "./pages/ActualiteDetail";
 import Sondages from "./pages/Sondages";
 import AG from "./pages/AG";
-import AdminArtisans from "./pages/admin/AdminArtisans";
+import AdminBadgesVigik from "./pages/admin/AdminBadgesVigik";
 import AdminSyndic from "./pages/admin/AdminSyndic";
 import AdminActualites from "./pages/admin/AdminActualites";
 import AdminSondages from "./pages/admin/AdminSondages";
@@ -40,7 +40,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/artisans" element={<ProtectedRoute><Artisans /></ProtectedRoute>} />
+                <Route path="/badges-vigik" element={<ProtectedRoute><BadgesVigik /></ProtectedRoute>} />
                 <Route path="/syndic" element={<ProtectedRoute><Syndic /></ProtectedRoute>} />
                 <Route path="/actualites" element={<ProtectedRoute><Actualites /></ProtectedRoute>} />
                 <Route path="/actualites/:id" element={<ProtectedRoute><ActualiteDetail /></ProtectedRoute>} />
@@ -48,7 +48,7 @@ const App = () => (
                 <Route path="/sondages" element={<ProtectedRoute><Sondages /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/admin/artisans" element={<ProtectedRoute requireAG><AdminArtisans /></ProtectedRoute>} />
+                <Route path="/admin/badges-vigik" element={<ProtectedRoute requireAG><AdminBadgesVigik /></ProtectedRoute>} />
                 <Route path="/admin/syndic" element={<ProtectedRoute requireAG><AdminSyndic /></ProtectedRoute>} />
                 <Route path="/admin/actualites" element={<ProtectedRoute requireAG><AdminActualites /></ProtectedRoute>} />
                 <Route path="/admin/ag" element={<ProtectedRoute requireAG><AdminAG /></ProtectedRoute>} />

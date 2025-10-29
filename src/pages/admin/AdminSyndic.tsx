@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, UploadCloud, Image as ImageIcon, X as XIcon } from 'lucide-react';
 import { z } from 'zod';
 
 interface Membre {
@@ -35,6 +35,8 @@ const AdminAssemblee = () => {
   const [membres, setMembres] = useState<Membre[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [editingMembre, setEditingMembre] = useState<Membre | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     position: '',
@@ -139,6 +141,50 @@ const AdminAssemblee = () => {
     setIsOpen(true);
   };
 
+  const randomName = (original: File) => {
+    const ext = original.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const rand = Math.random().toString(36).slice(2, 10);
+    return `membre-${Date.now()}-${rand}.${ext}`;
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
+      toast({ title: 'Fichier invalide', description: 'Formats autorisés: JPG, PNG, WEBP', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Fichier trop volumineux', description: 'Taille maximale 5 Mo', variant: 'destructive' });
+      return;
+    }
+
+    setUploading(true);
+    const path = randomName(file);
+    const { error: upErr } = await supabase.storage.from('membres-photos').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (upErr) {
+      setUploading(false);
+      toast({ title: 'Upload échoué', description: upErr.message, variant: 'destructive' });
+      return;
+    }
+
+    const { data: pub } = supabase.storage.from('membres-photos').getPublicUrl(path);
+    setFormData((prev) => ({ ...prev, photo_url: pub.publicUrl }));
+    setUploading(false);
+    toast({ title: 'Photo téléchargée', description: 'Aperçu mis à jour' });
+  };
+
+  const onDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) await handleFileUpload(file);
+  };
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) await handleFileUpload(file);
+  };
+
   return (
     <div className="container mx-auto px-4 py-24">
       <div className="flex justify-between items-center mb-8">
@@ -187,13 +233,40 @@ const AdminAssemblee = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="photo_url">URL de la photo</Label>
-                <Input
-                  id="photo_url"
-                  type="url"
-                  value={formData.photo_url}
-                  onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                />
+                <Label>Photo du membre</Label>
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
+                  onDragLeave={() => setIsDragActive(false)}
+                  onDrop={onDrop}
+                  className={`rounded-lg border ${isDragActive ? 'border-primary bg-primary/5' : 'border-dashed'} p-4 flex flex-col items-center justify-center text-center gap-3`}
+                >
+                  {formData.photo_url ? (
+                    <div className="flex items-center gap-4">
+                      <img src={formData.photo_url} alt="Aperçu" className="w-16 h-16 rounded-full object-cover" />
+                      <div className="flex gap-2">
+                        <label className="inline-flex items-center gap-2 cursor-pointer text-sm px-3 py-2 rounded-md border">
+                          <UploadCloud className="h-4 w-4" />
+                          Remplacer
+                          <input type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+                        </label>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => setFormData({ ...formData, photo_url: '' })}>
+                          <XIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Glissez-déposez une image ici, ou</p>
+                      <label className="inline-flex items-center gap-2 cursor-pointer text-sm px-3 py-2 rounded-md border">
+                        <UploadCloud className="h-4 w-4" />
+                        Choisir un fichier
+                        <input type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+                      </label>
+                      {uploading && <p className="text-xs text-muted-foreground">Téléversement en cours…</p>}
+                    </>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">

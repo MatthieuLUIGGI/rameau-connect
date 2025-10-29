@@ -1,4 +1,4 @@
-import { Wrench, Users, Newspaper, FileText, ArrowRight, Sparkles } from "lucide-react";
+import { KeyRound, Users, Newspaper, FileText, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,10 +7,10 @@ import heroImage from "@/assets/hero-rameau.jpg";
 const Home = () => {
   const quickLinks = [
     {
-      icon: Wrench,
-      title: "Artisans",
-      description: "Trouvez des professionnels de confiance",
-      href: "/artisans",
+      icon: KeyRound,
+      title: "Badges Vigik",
+      description: "Disponibilité des badges et prochaines réceptions",
+      href: "/badges-vigik",
       color: "from-blue-500/20 to-cyan-500/20"
     },
     {
@@ -106,10 +106,10 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
               {
-                icon: Wrench,
-                title: "Artisans",
-                description: "Consultez notre liste des artisans intervenants au Rameau",
-                href: "/artisans",
+                icon: KeyRound,
+                title: "Badges Vigik",
+                description: "Consultez le stock disponible et les réceptions prévues",
+                href: "/badges-vigik",
                 color: "from-blue-500/10 to-cyan-500/10"
               },
               {

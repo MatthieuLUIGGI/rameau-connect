@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, Wrench, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,7 +19,7 @@ const Navigation = () => {
 
   const navItems = [
     { path: "/", label: "Accueil", icon: Home },
-    { path: "/artisans", label: "Artisans", icon: Wrench },
+    { path: "/badges-vigik", label: "Badges Vigik", icon: KeyRound },
     { path: "/syndic", label: "Syndic", icon: Users },
     { path: "/actualites", label: "Actualités", icon: Newspaper },
     { path: "/ag", label: "AG", icon: BarChart3 },
@@ -74,7 +74,7 @@ const Navigation = () => {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link to="/admin/artisans">Gérer les artisans</Link>
+                        <Link to="/admin/badges-vigik">Gérer les badges Vigik</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/admin/syndic">Gérer le syndic</Link>
@@ -152,11 +152,11 @@ const Navigation = () => {
                   {isAG && (
                     <>
                       <Link
-                        to="/admin/artisans"
+                        to="/admin/badges-vigik"
                         onClick={() => setIsOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
                       >
-                        <span className="font-medium">Gérer les artisans</span>
+                        <span className="font-medium">Gérer les badges Vigik</span>
                       </Link>
                       <Link
                         to="/admin/syndic"
