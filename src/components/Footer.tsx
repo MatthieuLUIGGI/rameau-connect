@@ -1,4 +1,5 @@
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -36,6 +37,13 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-sm text-primary-foreground/60">
+          <div className="flex flex-col sm:flex-row gap-3 items-center justify-center mb-2">
+            <Link to="/mentions-legales" className="hover:underline">Mentions légales</Link>
+            <span className="hidden sm:inline">•</span>
+            <Link to="/confidentialite" className="hover:underline">Politique de confidentialité</Link>
+            <span className="hidden sm:inline">•</span>
+            <Link to="/cookies" className="hover:underline">Cookies</Link>
+          </div>
           <p>&copy; {new Date().getFullYear()} Copropriété Le Rameau. Tous droits réservés.</p>
         </div>
       </div>
