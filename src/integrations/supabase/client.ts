@@ -2,64 +2,16 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-function createNoopClient() {
-  const explain = () => {
-    const msg = [
-      "Supabase n'est pas configuré: variables d'environnement manquantes.",
-      "Ajoutez un fichier .env.local (non versionné) avec:",
-      "VITE_SUPABASE_URL=",
-      "VITE_SUPABASE_PUBLISHABLE_KEY=",
-      "ou configurez ces variables dans l'environnement de déploiement (ex: Vercel).",
-    ].join("\n");
-    // Affiche une erreur claire et non cryptique
-    console.error(msg);
-    throw new Error("Supabase non configuré (VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY)");
-  };
-
-  const handler: ProxyHandler<any> = {
-    get() {
-      // Retourne une fonction proxy qui jette une explication au moment de l'appel
-      return new Proxy(function () {}, {
-        apply() {
-          return explain();
-        },
-        get() {
-          // Chaînage illimité: toute méthode accédée renvoie une fonction qui jette
-          return new Proxy(function () {}, {
-            apply() {
-              return explain();
-            },
-            get() {
-              return new Proxy(function () {}, {
-                apply() {
-                  return explain();
-                },
-              });
-            },
-          });
-        },
-      });
-    },
-    apply() {
-      return explain();
-    },
-  };
-
-  return new Proxy(function () {}, handler) as any;
-}
-
-export const supabase = (SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY)
-  ? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: {
-        storage: localStorage,
-        persistSession: true,
-        autoRefreshToken: true,
-      },
-    })
-  : createNoopClient();
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
