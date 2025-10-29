@@ -60,6 +60,23 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Configuration Supabase (variables d'environnement)
+
+Cette app utilise Supabase côté client via Vite. Les variables doivent commencer par `VITE_` pour être injectées au build.
+
+1. Créez un fichier `.env` à la racine (ou utilisez les variables de votre hébergeur) avec:
+
+```
+VITE_SUPABASE_URL=<votre Project URL>
+VITE_SUPABASE_PUBLISHABLE_KEY=<votre anon public key>
+```
+
+Vous trouverez ces valeurs dans Supabase: Project Settings → API → Project URL et `anon public`.
+
+2. En production (ex. Vercel): allez dans Project → Settings → Environment Variables et ajoutez les mêmes clés `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY` pour l'environnement concerné (Production/Preview). Déployez à nouveau.
+
+Si elles sont manquantes, l'app lèvera une erreur explicite au démarrage.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/bc56b98a-eca4-444c-a23e-da86fdcd03c0) and click on Share -> Publish.

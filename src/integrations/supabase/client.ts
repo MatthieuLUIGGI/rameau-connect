@@ -2,8 +2,21 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+
+// Guard against missing env vars to provide a clearer error in dev/prod
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  const missing = [
+    !SUPABASE_URL && 'VITE_SUPABASE_URL',
+    !SUPABASE_PUBLISHABLE_KEY && 'VITE_SUPABASE_PUBLISHABLE_KEY',
+  ].filter(Boolean).join(', ');
+  throw new Error(
+    `Variables d'environnement manquantes: ${missing}.\n` +
+    'Sous Vite, elles doivent commencer par VITE_ et être définies à la fois en local (.env) et sur votre hébergeur (p. ex. Vercel).\n' +
+    'Valeurs attendues: VITE_SUPABASE_URL = Project URL, VITE_SUPABASE_PUBLISHABLE_KEY = anon public key.'
+  );
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
