@@ -12,6 +12,7 @@ interface Actualite {
   content: string;
   image_url: string | null;
   published_at: string;
+  file_url?: string | null;
 }
 
 const Actualites = () => {
@@ -129,9 +130,22 @@ const Actualites = () => {
                     </p>
                   )}
                   
-                  <div className="flex items-center gap-2 text-primary font-medium mt-2">
-                    <span>Lire la suite</span>
-                    <ArrowRight className="h-4 w-4" />
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-2 text-primary font-medium">
+                      <span>Lire la suite</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
+                    {article.file_url && (
+                      <a
+                        href={article.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        📄 Télécharger le PDF
+                      </a>
+                    )}
                   </div>
                   
                   {article.image_url && (

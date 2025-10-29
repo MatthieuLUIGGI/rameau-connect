@@ -14,6 +14,7 @@ interface Actualite {
   content: string;
   image_url: string | null;
   published_at: string;
+  file_url?: string | null;
 }
 
 const ActualiteDetail = () => {
@@ -119,6 +120,19 @@ const ActualiteDetail = () => {
               className="prose prose-lg max-w-none dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: actualite.content }}
             />
+
+            {actualite.file_url && (
+              <div>
+                <a
+                  href={actualite.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-primary underline"
+                >
+                  📄 Télécharger le PDF associé
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
