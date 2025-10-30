@@ -10,7 +10,7 @@ interface StockRow {
   id: string;
   available_count: number;
   next_reception_date: string | null; // YYYY-MM-DD
-  price: string | null; // stored as numeric in DB, returned as string
+  price: string | null; // stored as numeric in DB, returned as string 
 }
 
 const AdminBadgesVigik = () => {
