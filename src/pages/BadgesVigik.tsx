@@ -8,6 +8,7 @@ interface StockRow {
   id: string;
   available_count: number;
   next_reception_date: string | null; // ISO date string (YYYY-MM-DD)
+  price: string | null; // numeric returned as string
 }
 
 const BadgesVigik = () => {
@@ -54,6 +55,11 @@ const BadgesVigik = () => {
 
   const available = stock?.available_count ?? 0;
   const nextDateText = formatDate(stock?.next_reception_date);
+  const priceNumber = stock?.price != null ? parseFloat(stock.price) : null;
+  const priceText =
+    priceNumber != null && !Number.isNaN(priceNumber)
+      ? new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR" }).format(priceNumber)
+      : null;
 
   return (
     <div className="min-h-screen pt-24 pb-12">
@@ -70,6 +76,15 @@ const BadgesVigik = () => {
         <div className="max-w-xl mx-auto animate-slide-up">
           <Card className="border-border">
             <CardContent className="p-6 sm:p-8">
+              {priceText ? (
+                <div className="mb-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <p className="text-blue-800 dark:text-blue-300">
+                    Le tarif d'un badge est : <span className="font-medium">{priceText}</span>
+                  </p>
+                </div>
+              ) : (
+                <p className="mb-6 text-sm text-muted-foreground">Tarif non défini pour le moment.</p>
+              )}
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                   <KeyRound className="h-8 w-8" />

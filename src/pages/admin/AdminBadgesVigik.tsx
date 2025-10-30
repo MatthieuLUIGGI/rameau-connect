@@ -10,6 +10,7 @@ interface StockRow {
   id: string;
   available_count: number;
   next_reception_date: string | null; // YYYY-MM-DD
+  price: string | null; // stored as numeric in DB, returned as string
 }
 
 const AdminBadgesVigik = () => {
@@ -17,6 +18,7 @@ const AdminBadgesVigik = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [available, setAvailable] = useState<number>(0);
   const [date, setDate] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,13 +39,15 @@ const AdminBadgesVigik = () => {
       setRow(r);
       setAvailable(r?.available_count ?? 0);
       setDate(r?.next_reception_date ?? "");
+      setPrice(r?.price ?? "");
     }
     setIsLoading(false);
   };
 
   const save = async () => {
     setIsLoading(true);
-    const payload = { available_count: available, next_reception_date: date || null };
+    const priceValue = price === "" ? null : Number.isNaN(parseFloat(price)) ? null : parseFloat(price);
+    const payload = { available_count: available, next_reception_date: date || null, price: priceValue } as any;
 
     let error;
     if (row?.id) {
@@ -85,6 +89,19 @@ const AdminBadgesVigik = () => {
               type="date"
               value={date || ""}
               onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2 max-w-xs">
+            <Label htmlFor="price">Tarif unitaire du badge (€)</Label>
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              min={0}
+              inputMode="decimal"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Ex: 15.00"
             />
           </div>
           <div>
