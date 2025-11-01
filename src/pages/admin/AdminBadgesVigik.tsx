@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { z } from 'zod';
 
 interface StockRow {
   id: string;
@@ -13,12 +12,6 @@ interface StockRow {
   next_reception_date: string | null; // YYYY-MM-DD
   price: string | null; // stored as numeric in DB, returned as string 
 }
-
-const stockSchema = z.object({
-  available_count: z.number().int().min(0, "Le nombre de badges ne peut pas être négatif"),
-  next_reception_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Format de date invalide (YYYY-MM-DD)").optional().or(z.literal('')),
-  price: z.number().min(0, "Le prix ne peut pas être négatif").optional().nullable()
-});
 
 const AdminBadgesVigik = () => {
   const [row, setRow] = useState<StockRow | null>(null);
@@ -53,38 +46,8 @@ const AdminBadgesVigik = () => {
 
   const save = async () => {
     setIsLoading(true);
-    
-    // Parse and validate price
-    const priceValue = price === "" ? null : parseFloat(price);
-    if (price !== "" && (isNaN(priceValue!) || priceValue! < 0)) {
-      toast({ 
-        title: "Erreur de validation", 
-        description: "Le prix doit être un nombre positif", 
-        variant: "destructive" 
-      });
-      setIsLoading(false);
-      return;
-    }
-    
-    // Prepare payload
-    const payload = { 
-      available_count: available, 
-      next_reception_date: date || null, 
-      price: priceValue 
-    };
-    
-    // Validate with Zod
-    const validation = stockSchema.safeParse(payload);
-    if (!validation.success) {
-      const errors = validation.error.errors.map(e => e.message).join(', ');
-      toast({ 
-        title: 'Validation échouée', 
-        description: errors, 
-        variant: 'destructive' 
-      });
-      setIsLoading(false);
-      return;
-    }
+    const priceValue = price === "" ? null : Number.isNaN(parseFloat(price)) ? null : parseFloat(price);
+    const payload = { available_count: available, next_reception_date: date || null, price: priceValue } as any;
 
     let error;
     if (row?.id) {
@@ -96,7 +59,7 @@ const AdminBadgesVigik = () => {
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Sauvegardé", description: "Stock mis à jour avec succès" });
+      toast({ title: "Sauvegardé", description: "Stock mis à jour" });
       await fetchRow();
     }
     setIsLoading(false);
