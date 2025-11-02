@@ -23,12 +23,11 @@ export const useNotifications = () => {
       .from('notifications')
       .select('*')
       .eq('user_id', user.id)
-      .eq('read', false)
       .order('created_at', { ascending: false });
 
     if (!error && data) {
       setNotifications(data);
-      setUnreadCount(data.length);
+      setUnreadCount(data.filter(n => !n.read).length);
     }
   };
 

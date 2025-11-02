@@ -68,10 +68,23 @@ const NotificationBell = () => {
           notifications.map((notification) => (
             <DropdownMenuItem
               key={notification.id}
-              className="cursor-pointer flex flex-col items-start p-3"
+              className={`cursor-pointer flex flex-col items-start p-3 gap-1 ${
+                notification.read 
+                  ? 'opacity-50 bg-muted/30' 
+                  : 'bg-accent/10 border-l-2 border-accent'
+              }`}
               onClick={() => handleNotificationClick(notification)}
             >
-              <span className="font-medium text-sm">{notification.title}</span>
+              <div className="flex items-center gap-2 w-full">
+                <span className={`font-medium text-sm flex-1 ${
+                  notification.read ? 'text-muted-foreground' : 'text-foreground'
+                }`}>
+                  {notification.title}
+                </span>
+                {!notification.read && (
+                  <span className="h-2 w-2 rounded-full bg-accent flex-shrink-0" />
+                )}
+              </div>
               <span className="text-xs text-muted-foreground">
                 {new Date(notification.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',

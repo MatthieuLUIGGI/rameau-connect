@@ -28,18 +28,20 @@ const Footer = () => {
 
           <div>
             <h3 className="text-lg font-semibold mb-4">Horaires du syndic</h3>
-            <p>Régie Foncière</p>
-            <div className="space-y-2 text-sm text-primary-foreground/80">
-              <p>Lundi - Mardi - Jeudi</p>
-              <p className="font-medium">10h00 - 12h00 / 14h00 - 18h00</p>
-            </div>
-            <div className="space-y-2 text-sm text-primary-foreground/80">
-              <p>Mercredi</p>
-              <p className="font-medium">Fermé</p>
-            </div>
-            <div className="space-y-2 text-sm text-primary-foreground/80">
-              <p>Vendredi</p>
-              <p className="font-medium">10h00 - 12h00 / 14h00 - 17h00</p>
+            <p className="text-sm mb-3 text-primary-foreground/90 font-medium">Régie Foncière</p>
+            <div className="space-y-3">
+              <div className="bg-primary-foreground/10 rounded-lg p-3 border border-primary-foreground/20">
+                <p className="text-sm font-medium mb-1">Lundi - Mardi - Jeudi</p>
+                <p className="text-sm text-primary-foreground/80">10h00 - 12h00 / 14h00 - 18h00</p>
+              </div>
+              <div className="bg-primary-foreground/10 rounded-lg p-3 border border-primary-foreground/20">
+                <p className="text-sm font-medium mb-1">Mercredi</p>
+                <p className="text-sm text-primary-foreground/80">Fermé</p>
+              </div>
+              <div className="bg-primary-foreground/10 rounded-lg p-3 border border-primary-foreground/20">
+                <p className="text-sm font-medium mb-1">Vendredi</p>
+                <p className="text-sm text-primary-foreground/80">10h00 - 12h00 / 14h00 - 17h00</p>
+              </div>
             </div>
           </div>
         </div>
