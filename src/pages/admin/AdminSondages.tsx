@@ -99,13 +99,31 @@ const AdminSondages = () => {
         resetForm();
       }
     } else {
-      const { error } = await supabase
+      const { data: newSondage, error } = await supabase
         .from('sondages')
-        .insert([{ ...formData, options: validOptions }]);
+        .insert([{ ...formData, options: validOptions }])
+        .select()
+        .single();
       
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
+      } else if (newSondage) {
+        // Créer une notification pour tous les utilisateurs
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('id');
+        
+        if (usersData) {
+          const notifications = usersData.map(profile => ({
+            user_id: profile.id,
+            type: 'sondage' as const,
+            reference_id: newSondage.id,
+            title: `Nouveau sondage : ${formData.question}`
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+        
         toast({ title: 'Succès', description: 'Sondage ajouté avec succès' });
         fetchSondages();
         resetForm();
@@ -124,6 +142,13 @@ const AdminSondages = () => {
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
+      // Supprimer les notifications liées
+      await supabase
+        .from('notifications')
+        .delete()
+        .eq('type', 'sondage')
+        .eq('reference_id', id);
+      
       toast({ title: 'Succès', description: 'Sondage supprimé avec succès' });
       fetchSondages();
     }

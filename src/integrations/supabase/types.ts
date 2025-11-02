@@ -119,39 +119,60 @@ export type Database = {
       membres_assemblee: {
         Row: {
           created_at: string | null
-          address: string | null
-          email: string | null
           id: string
           level: number
           name: string
           photo_url: string | null
-          phone: string | null
           position: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          address?: string | null
-          email?: string | null
           id?: string
           level?: number
           name: string
           photo_url?: string | null
-          phone?: string | null
           position: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          address?: string | null
-          email?: string | null
           id?: string
           level?: number
           name?: string
           photo_url?: string | null
-          phone?: string | null
           position?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          read: boolean
+          reference_id: string
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          read?: boolean
+          reference_id: string
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          read?: boolean
+          reference_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -285,6 +306,7 @@ export type Database = {
     }
     Enums: {
       app_role: "user" | "ag"
+      notification_type: "actualite" | "compte_rendu" | "sondage"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -413,6 +435,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "ag"],
+      notification_type: ["actualite", "compte_rendu", "sondage"],
     },
   },
 } as const

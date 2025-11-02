@@ -144,13 +144,31 @@ const AdminAG = () => {
         resetForm();
       }
     } else {
-      const { error } = await supabase
+      const { data: newCompteRendu, error } = await supabase
         .from('comptes_rendus_ag')
-        .insert([{ ...formData, file_url: fileUrl }]);
+        .insert([{ ...formData, file_url: fileUrl }])
+        .select()
+        .single();
       
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
+      } else if (newCompteRendu) {
+        // Créer une notification pour tous les utilisateurs
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('id');
+        
+        if (usersData) {
+          const notifications = usersData.map(profile => ({
+            user_id: profile.id,
+            type: 'compte_rendu' as const,
+            reference_id: newCompteRendu.id,
+            title: `Nouveau compte rendu AG : ${formData.title}`
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+        
         toast({ title: 'Succès', description: 'Compte rendu ajouté avec succès' });
         fetchComptesRendus();
         resetForm();
@@ -180,6 +198,13 @@ const AdminAG = () => {
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
+      // Supprimer les notifications liées
+      await supabase
+        .from('notifications')
+        .delete()
+        .eq('type', 'compte_rendu')
+        .eq('reference_id', id);
+      
       toast({ title: 'Succès', description: 'Compte rendu supprimé avec succès' });
       fetchComptesRendus();
     }

@@ -117,13 +117,31 @@ const AdminActualites = () => {
         resetForm();
       }
     } else {
-      const { error } = await supabase
+      const { data: newActualite, error } = await supabase
         .from('actualites')
-        .insert([{ ...rest, file_url: newFileUrl, author_id: user?.id }]);
+        .insert([{ ...rest, file_url: newFileUrl, author_id: user?.id }])
+        .select()
+        .single();
       
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
+      } else if (newActualite) {
+        // Créer une notification pour tous les utilisateurs
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('id');
+        
+        if (usersData) {
+          const notifications = usersData.map(profile => ({
+            user_id: profile.id,
+            type: 'actualite' as const,
+            reference_id: newActualite.id,
+            title: `Nouvelle actualité : ${rest.title}`
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+        
         toast({ title: 'Succès', description: 'Actualité ajoutée avec succès' });
         fetchActualites();
         resetForm();
@@ -164,6 +182,13 @@ const AdminActualites = () => {
         if (error) {
           toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
         } else {
+          // Supprimer les notifications liées
+          await supabase
+            .from('notifications')
+            .delete()
+            .eq('type', 'actualite')
+            .eq('reference_id', id);
+          
           toast({ title: 'Succès', description: 'Actualité supprimée avec succès' });
           fetchActualites();
         }

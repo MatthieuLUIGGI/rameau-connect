@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +57,8 @@ const Navigation = () => {
                 </Link>
               );
             })}
+            
+            {user && <NotificationBell />}
             
             {user ? (
               <DropdownMenu>
