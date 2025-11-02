@@ -120,13 +120,16 @@ const AdminBadgesVigik = () => {
             />
           </div>
           <div className="space-y-2 max-w-xs">
-            <Label htmlFor="date">Prochaine réception</Label>
+            <Label htmlFor="date">Prochaine réception (optionnel)</Label>
             <Input
               id="date"
               type="date"
               value={date || ""}
               onChange={(e) => setDate(e.target.value)}
             />
+            <p className="text-sm text-muted-foreground">
+              À remplir uniquement en cas de rupture de stock (0 badge disponible)
+            </p>
           </div>
           <div className="space-y-2 max-w-xs">
             <Label htmlFor="price">Tarif unitaire du badge (€)</Label>
