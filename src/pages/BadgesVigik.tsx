@@ -112,11 +112,6 @@ const BadgesVigik = () => {
                 </div>
               )}
 
-              {available > 0 && nextDateText && (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  Prochaine réception prévue le {nextDateText}.
-                </p>
-              )}
             </CardContent>
           </Card>
         </div>
