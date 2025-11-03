@@ -13,6 +13,8 @@ interface Actualite {
   image_url: string | null;
   published_at: string;
   file_url?: string | null;
+  priority: 'info' | 'normal' | 'important' | 'urgent';
+  expires_at: string | null;
 }
 
 const Actualites = () => {
@@ -50,7 +52,22 @@ const Actualites = () => {
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
-      setActualites(data || []);
+      // Filtrer les actualités expirées
+      const now = new Date();
+      const filteredData = ((data || []) as unknown as Actualite[]).filter(actualite => {
+        if (!actualite.expires_at) return true;
+        return new Date(actualite.expires_at) > now;
+      });
+      
+      // Trier par priorité (urgent > important > normal > info) puis par date
+      const sortedData = filteredData.sort((a, b) => {
+        const priorityOrder = { urgent: 0, important: 1, normal: 2, info: 3 };
+        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+      });
+      
+      setActualites(sortedData);
     }
     setIsLoading(false);
   };
@@ -81,13 +98,30 @@ const Actualites = () => {
           </div>
         ) : (
           <div className="max-w-2xl mx-auto space-y-4">
-            {actualites.map((article, index) => (
-              <Card 
-                key={article.id} 
-                className="p-6 hover-lift border-border bg-card cursor-pointer transition-all duration-200 hover:shadow-lg"
-                style={{ animationDelay: `${index * 50}ms` }}
-                onClick={() => window.location.href = `/actualites/${article.id}`}
-              >
+            {actualites.map((article, index) => {
+              const priorityStyles = {
+                urgent: 'border-red-600 bg-red-50 dark:bg-red-950/30 shadow-lg shadow-red-500/20',
+                important: 'border-red-500 bg-red-50 dark:bg-red-950/20',
+                normal: 'border-border bg-card',
+                info: 'border-blue-400 bg-blue-50 dark:bg-blue-950/20'
+              };
+              
+              const priorityBadges = {
+                urgent: { icon: '🚨', text: 'URGENT', color: 'bg-red-600 text-white animate-pulse' },
+                important: { icon: '⚠️', text: 'Important', color: 'bg-red-500 text-white' },
+                info: { icon: 'ℹ️', text: 'Info', color: 'bg-blue-500 text-white' },
+                normal: null
+              };
+              
+              const badge = priorityBadges[article.priority];
+              
+              return (
+                <Card 
+                  key={article.id} 
+                  className={`p-6 hover-lift cursor-pointer transition-all duration-200 hover:shadow-lg ${priorityStyles[article.priority]}`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => window.location.href = `/actualites/${article.id}`}
+                >
                 {/* Thread Header */}
                 <div className="flex items-start gap-4 mb-4">
                   <Avatar className="w-10 h-10">
@@ -113,9 +147,16 @@ const Actualites = () => {
 
                 {/* Thread Content */}
                 <div className="space-y-3">
-                  <h2 className="text-xl font-bold text-foreground leading-tight">
-                    {article.title}
-                  </h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-foreground leading-tight flex-1">
+                      {article.title}
+                    </h2>
+                    {badge && (
+                      <span className={`text-xs px-3 py-1 rounded-full font-semibold ${badge.color}`}>
+                        {badge.icon} {badge.text}
+                      </span>
+                    )}
+                  </div>
                   
                   {article.excerpt && (
                     <p className="text-muted-foreground leading-relaxed">
@@ -164,9 +205,16 @@ const Actualites = () => {
                   <div className="flex items-center gap-1">
                     <span className="font-medium">Copropriété Le Rameau</span>
                   </div>
+                  {article.expires_at && (
+                    <div className="flex items-center gap-1 text-xs">
+                      <Calendar className="h-3 w-3" />
+                      <span>Expire le {new Date(article.expires_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  )}
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

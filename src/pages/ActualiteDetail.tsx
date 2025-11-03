@@ -15,6 +15,8 @@ interface Actualite {
   image_url: string | null;
   published_at: string;
   file_url?: string | null;
+  priority: 'info' | 'normal' | 'important' | 'urgent';
+  expires_at: string | null;
 }
 
 const ActualiteDetail = () => {
@@ -41,7 +43,7 @@ const ActualiteDetail = () => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       navigate('/actualites');
     } else {
-      setActualite(data);
+      setActualite(data as unknown as Actualite);
     }
     setIsLoading(false);
   };
@@ -71,6 +73,21 @@ const ActualiteDetail = () => {
         </Button>
 
         <Card className="max-w-4xl mx-auto p-6 md:p-8 border-border bg-card animate-fade-in">
+          {/* Badge de priorité */}
+          {actualite.priority !== 'normal' && (
+            <div className="mb-6">
+              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                actualite.priority === 'urgent' ? 'bg-red-600 text-white animate-pulse' :
+                actualite.priority === 'important' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+              }`}>
+                {actualite.priority === 'urgent' && '🚨 URGENT'}
+                {actualite.priority === 'important' && '⚠️ Important'}
+                {actualite.priority === 'info' && 'ℹ️ Info'}
+              </span>
+            </div>
+          )}
+          
           {/* Header */}
           <div className="flex items-start gap-4 mb-6">
             <Avatar className="w-12 h-12">

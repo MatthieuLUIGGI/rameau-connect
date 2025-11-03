@@ -20,6 +20,8 @@ interface Actualite {
   image_url: string | null;
   published_at: string;
   file_url?: string | null;
+  priority: 'info' | 'normal' | 'important' | 'urgent';
+  expires_at: string | null;
 }
 
 const actualiteSchema = z.object({
@@ -48,7 +50,9 @@ const AdminActualites = () => {
     excerpt: '',
     content: '',
     image_url: '',
-    file_url: '' as string | null | ''
+    file_url: '' as string | null | '',
+    priority: 'normal' as 'info' | 'normal' | 'important' | 'urgent',
+    expires_at: ''
   });
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -69,7 +73,7 @@ const AdminActualites = () => {
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
-      setActualites(data || []);
+      setActualites((data || []) as unknown as Actualite[]);
     }
   };
 
@@ -78,7 +82,7 @@ const AdminActualites = () => {
     setIsUploading(true);
     
     // Validate input
-    const { file_url, ...rest } = formData;
+    const { file_url, priority, expires_at, ...rest } = formData;
     const validation = actualiteSchema.safeParse(rest);
     if (!validation.success) {
       const errors = validation.error.errors.map(e => e.message).join(', ');
@@ -102,7 +106,12 @@ const AdminActualites = () => {
     if (editingActualite) {
       const { error } = await supabase
         .from('actualites')
-        .update({ ...rest, file_url: newFileUrl })
+        .update({ 
+          ...rest, 
+          file_url: newFileUrl, 
+          priority,
+          expires_at: expires_at ? new Date(expires_at).toISOString() : null
+        })
         .eq('id', editingActualite.id);
       
       if (error) {
@@ -119,7 +128,13 @@ const AdminActualites = () => {
     } else {
       const { data: newActualite, error } = await supabase
         .from('actualites')
-        .insert([{ ...rest, file_url: newFileUrl, author_id: user?.id }])
+        .insert([{ 
+          ...rest, 
+          file_url: newFileUrl, 
+          author_id: user?.id,
+          priority,
+          expires_at: expires_at ? new Date(expires_at).toISOString() : null
+        }])
         .select()
         .single();
       
@@ -195,7 +210,7 @@ const AdminActualites = () => {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', excerpt: '', content: '', image_url: '', file_url: '' });
+    setFormData({ title: '', excerpt: '', content: '', image_url: '', file_url: '', priority: 'normal', expires_at: '' });
     setFile(null);
     setEditingActualite(null);
     setIsOpen(false);
@@ -208,7 +223,9 @@ const AdminActualites = () => {
       excerpt: actualite.excerpt || '',
       content: actualite.content,
       image_url: actualite.image_url || '',
-      file_url: actualite.file_url || ''
+      file_url: actualite.file_url || '',
+      priority: actualite.priority,
+      expires_at: actualite.expires_at ? new Date(actualite.expires_at).toISOString().split('T')[0] : ''
     });
     setFile(null);
     setIsOpen(true);
@@ -348,6 +365,34 @@ const AdminActualites = () => {
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Niveau de priorité *</Label>
+                  <select
+                    id="priority"
+                    value={formData.priority}
+                    onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="info">Info (bleu clair)</option>
+                    <option value="normal">Normal</option>
+                    <option value="important">Important (rouge, épinglé)</option>
+                    <option value="urgent">Urgent (rouge vif, épinglé en premier)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expires_at">Date d'expiration (optionnel)</Label>
+                  <Input
+                    id="expires_at"
+                    type="date"
+                    value={formData.expires_at}
+                    onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    L'actualité sera masquée après cette date
+                  </p>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="file">
                   Fichier PDF (optionnel)
@@ -411,22 +456,48 @@ const AdminActualites = () => {
       </div>
 
       <div className="grid gap-4">
-        {actualites.map((actualite) => (
-          <Card key={actualite.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle>{actualite.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(actualite.published_at).toLocaleDateString('fr-FR')}
-                  </p>
-                  {actualite.excerpt && <p className="mt-2 text-sm">{actualite.excerpt}</p>}
-                  {actualite.file_url && (
-                    <p className="mt-2 text-sm">
-                      <a href={actualite.file_url} target="_blank" rel="noreferrer" className="text-primary underline">📄 Voir le PDF</a>
+        {actualites.map((actualite) => {
+          const priorityColors = {
+            info: 'border-blue-400 bg-blue-50 dark:bg-blue-950/20',
+            normal: '',
+            important: 'border-red-500 bg-red-50 dark:bg-red-950/20',
+            urgent: 'border-red-700 bg-red-100 dark:bg-red-950/40'
+          };
+          
+          return (
+            <Card key={actualite.id} className={priorityColors[actualite.priority]}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CardTitle>{actualite.title}</CardTitle>
+                      {actualite.priority !== 'normal' && (
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          actualite.priority === 'urgent' ? 'bg-red-600 text-white' :
+                          actualite.priority === 'important' ? 'bg-red-500 text-white' :
+                          'bg-blue-500 text-white'
+                        }`}>
+                          {actualite.priority === 'urgent' ? '🚨 Urgent' :
+                           actualite.priority === 'important' ? '⚠️ Important' :
+                           'ℹ️ Info'}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(actualite.published_at).toLocaleDateString('fr-FR')}
+                      {actualite.expires_at && (
+                        <span className="ml-2">
+                          • Expire le {new Date(actualite.expires_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      )}
                     </p>
-                  )}
-                </div>
+                    {actualite.excerpt && <p className="mt-2 text-sm">{actualite.excerpt}</p>}
+                    {actualite.file_url && (
+                      <p className="mt-2 text-sm">
+                        <a href={actualite.file_url} target="_blank" rel="noreferrer" className="text-primary underline">📄 Voir le PDF</a>
+                      </p>
+                    )}
+                  </div>
                 <div className="flex gap-2">
                   <Button size="icon" variant="ghost" onClick={() => openEditDialog(actualite)}>
                     <Pencil className="h-4 w-4" />
@@ -434,16 +505,17 @@ const AdminActualites = () => {
                   <Button size="icon" variant="ghost" onClick={() => handleDelete(actualite.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            {actualite.image_url && (
-              <CardContent>
-                <img src={actualite.image_url} alt={actualite.title} className="w-full h-48 object-cover rounded-lg" />
-              </CardContent>
-            )}
-          </Card>
-        ))}
+              </CardHeader>
+              {actualite.image_url && (
+                <CardContent>
+                  <img src={actualite.image_url} alt={actualite.title} className="w-full h-48 object-cover rounded-lg" />
+                </CardContent>
+              )}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
