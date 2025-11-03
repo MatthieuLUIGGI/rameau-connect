@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface Notification {
   id: string;
-  type: 'actualite' | 'compte_rendu' | 'sondage';
+  type: 'actualite' | 'compte_rendu' | 'sondage' | 'role_request';
   reference_id: string;
   title: string;
   created_at: string;

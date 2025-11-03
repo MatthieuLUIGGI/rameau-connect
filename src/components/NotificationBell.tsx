@@ -23,6 +23,8 @@ const NotificationBell = () => {
         return '/ag';
       case 'sondage':
         return '/sondages';
+      case 'role_request':
+        return '/admin/role-requests';
       default:
         return '/';
     }
