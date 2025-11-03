@@ -59,13 +59,25 @@ const Actualites = () => {
         return new Date(actualite.expires_at) > now;
       });
       
-      // Trier par priorité (urgent > important > normal > info) puis par date
-      const sortedData = filteredData.sort((a, b) => {
+      // Séparer les actualités épinglées (urgent, important) des autres (normal, info)
+      const pinnedNews = filteredData.filter(a => a.priority === 'urgent' || a.priority === 'important');
+      const regularNews = filteredData.filter(a => a.priority === 'normal' || a.priority === 'info');
+      
+      // Trier les épinglées par priorité puis par date
+      const sortedPinned = pinnedNews.sort((a, b) => {
         const priorityOrder = { urgent: 0, important: 1, normal: 2, info: 3 };
         const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
         if (priorityDiff !== 0) return priorityDiff;
         return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
       });
+      
+      // Trier les régulières par date uniquement (plus récentes en haut)
+      const sortedRegular = regularNews.sort((a, b) => 
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
+      
+      // Combiner : épinglées en haut, régulières en dessous
+      const sortedData = [...sortedPinned, ...sortedRegular];
       
       setActualites(sortedData);
     }
