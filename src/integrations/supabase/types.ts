@@ -203,39 +203,6 @@ export type Database = {
         }
         Relationships: []
       }
-      role_requests: {
-        Row: {
-          created_at: string | null
-          id: string
-          message: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          message?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          message?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       sondages: {
         Row: {
           active: boolean | null
@@ -339,11 +306,7 @@ export type Database = {
     }
     Enums: {
       app_role: "user" | "ag"
-      notification_type:
-        | "actualite"
-        | "compte_rendu"
-        | "sondage"
-        | "role_request"
+      notification_type: "actualite" | "compte_rendu" | "sondage"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -472,12 +435,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "ag"],
-      notification_type: [
-        "actualite",
-        "compte_rendu",
-        "sondage",
-        "role_request",
-      ],
+      notification_type: ["actualite", "compte_rendu", "sondage"],
     },
   },
 } as const
