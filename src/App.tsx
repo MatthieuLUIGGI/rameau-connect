@@ -20,7 +20,6 @@ import AdminSyndic from "./pages/admin/AdminSyndic";
 import AdminActualites from "./pages/admin/AdminActualites";
 import AdminSondages from "./pages/admin/AdminSondages";
 import AdminAG from "./pages/admin/AdminAG";
-import AdminRoleRequests from "./pages/admin/AdminRoleRequests";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -66,7 +65,6 @@ const App = () => (
                 <Route path="/admin/actualites" element={<ProtectedRoute requireAG><AdminActualites /></ProtectedRoute>} />
                 <Route path="/admin/ag" element={<ProtectedRoute requireAG><AdminAG /></ProtectedRoute>} />
                 <Route path="/admin/sondages" element={<ProtectedRoute requireAG><AdminSondages /></ProtectedRoute>} />
-                <Route path="/admin/role-requests" element={<ProtectedRoute requireAG><AdminRoleRequests /></ProtectedRoute>} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route path="/confidentialite" element={<Confidentialite />} />
                 <Route path="/cookies" element={<Cookies />} />
