@@ -4,6 +4,7 @@ import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOu
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "@/components/NotificationBell";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,6 +60,7 @@ const Navigation = () => {
             })}
             
             {user && <NotificationBell />}
+            <ThemeToggle />
             
             {user ? (
               <DropdownMenu>
@@ -121,7 +123,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 space-y-2 animate-fade-in">
+          <div className="md:hidden py-4 space-y-2 animate-fade-in max-h-[calc(100vh-4rem)] overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -142,6 +144,10 @@ const Navigation = () => {
             })}
             
             <div className="pt-2 border-t border-border mt-2">
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="font-medium">Thème</span>
+                <ThemeToggle />
+              </div>
               {user ? (
                 <>
                   <Link
