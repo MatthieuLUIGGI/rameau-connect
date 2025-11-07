@@ -24,6 +24,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [apartmentNumber, setApartmentNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -62,7 +63,7 @@ const Auth = () => {
           description: 'Bienvenue sur Le Rameau'
         });
       } else {
-        if (!firstName || !lastName) {
+        if (!firstName || !lastName || !apartmentNumber) {
           toast({
             title: 'Erreur',
             description: 'Veuillez remplir tous les champs',
@@ -71,8 +72,19 @@ const Auth = () => {
           setIsLoading(false);
           return;
         }
+
+        const aptNum = parseInt(apartmentNumber);
+        if (isNaN(aptNum) || aptNum < 1 || aptNum > 113) {
+          toast({
+            title: 'Erreur',
+            description: 'Le numéro d\'appartement doit être entre 1 et 113',
+            variant: 'destructive'
+          });
+          setIsLoading(false);
+          return;
+        }
         
-        const { error } = await signUp(email, password, firstName, lastName);
+        const { error } = await signUp(email, password, firstName, lastName, aptNum);
         if (error) throw error;
         toast({
           title: 'Inscription réussie',
@@ -173,6 +185,22 @@ const Auth = () => {
                       required
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="apartmentNumber">Numéro d'appartement</Label>
+                  <Input
+                    id="apartmentNumber"
+                    type="number"
+                    min="1"
+                    max="113"
+                    placeholder="1-113"
+                    value={apartmentNumber}
+                    onChange={(e) => setApartmentNumber(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Entrez votre numéro d'appartement (1 à 113)
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>

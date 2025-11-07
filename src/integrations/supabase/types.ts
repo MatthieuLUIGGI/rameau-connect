@@ -178,6 +178,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          apartment_number: number | null
           created_at: string | null
           email: string | null
           first_name: string | null
@@ -186,6 +187,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          apartment_number?: number | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
@@ -194,12 +196,46 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          apartment_number?: number | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      role_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -253,6 +289,7 @@ export type Database = {
       }
       votes: {
         Row: {
+          apartment_number: number
           created_at: string | null
           id: string
           option_index: number
@@ -260,6 +297,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          apartment_number: number
           created_at?: string | null
           id?: string
           option_index: number
@@ -267,6 +305,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          apartment_number?: number
           created_at?: string | null
           id?: string
           option_index?: number
@@ -306,7 +345,11 @@ export type Database = {
     }
     Enums: {
       app_role: "user" | "ag"
-      notification_type: "actualite" | "compte_rendu" | "sondage"
+      notification_type:
+        | "actualite"
+        | "compte_rendu"
+        | "sondage"
+        | "role_request"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -435,7 +478,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "ag"],
-      notification_type: ["actualite", "compte_rendu", "sondage"],
+      notification_type: [
+        "actualite",
+        "compte_rendu",
+        "sondage",
+        "role_request",
+      ],
     },
   },
 } as const

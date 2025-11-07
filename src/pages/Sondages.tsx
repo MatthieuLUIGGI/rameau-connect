@@ -26,16 +26,33 @@ const Sondages = () => {
   const [userVotes, setUserVotes] = useState<Vote[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: number }>({});
   const [results, setResults] = useState<{ [key: string]: number[] }>({});
+  const [apartmentVotes, setApartmentVotes] = useState<string[]>([]);
+  const [apartmentNumber, setApartmentNumber] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user, isAG } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
+      fetchUserProfile();
       fetchSondages();
       fetchUserVotes();
     }
   }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('apartment_number')
+      .eq('id', user.id)
+      .single();
+    
+    if (!error && data) {
+      setApartmentNumber(data.apartment_number);
+    }
+  };
 
   const fetchSondages = async () => {
     const { data, error } = await supabase
@@ -61,15 +78,26 @@ const Sondages = () => {
   };
 
   const fetchUserVotes = async () => {
-    if (!user) return;
+    if (!user || !apartmentNumber) return;
     
-    const { data, error } = await supabase
+    // Fetch votes by user
+    const { data: userVoteData, error: userVoteError } = await supabase
       .from('votes')
       .select('sondage_id, option_index')
       .eq('user_id', user.id);
     
-    if (!error && data) {
-      setUserVotes(data);
+    if (!userVoteError && userVoteData) {
+      setUserVotes(userVoteData);
+    }
+
+    // Fetch votes by apartment number
+    const { data: aptVoteData, error: aptVoteError } = await supabase
+      .from('votes')
+      .select('sondage_id')
+      .eq('apartment_number', apartmentNumber);
+    
+    if (!aptVoteError && aptVoteData) {
+      setApartmentVotes(aptVoteData.map(v => v.sondage_id));
     }
   };
 
@@ -93,14 +121,15 @@ const Sondages = () => {
   };
 
   const handleVote = async (sondageId: string) => {
-    if (!user || selectedOptions[sondageId] === undefined) return;
+    if (!user || !apartmentNumber || selectedOptions[sondageId] === undefined) return;
 
     const { error } = await supabase
       .from('votes')
       .insert([{
         sondage_id: sondageId,
         user_id: user.id,
-        option_index: selectedOptions[sondageId]
+        option_index: selectedOptions[sondageId],
+        apartment_number: apartmentNumber
       }]);
     
     if (error) {
@@ -117,6 +146,10 @@ const Sondages = () => {
 
   const hasVoted = (sondageId: string) => {
     return userVotes.some(v => v.sondage_id === sondageId);
+  };
+
+  const hasApartmentVoted = (sondageId: string) => {
+    return apartmentVotes.includes(sondageId);
   };
 
   if (isLoading) {
@@ -147,6 +180,7 @@ const Sondages = () => {
           <div className="max-w-3xl mx-auto space-y-8">
             {sondages.map((sondage, index) => {
               const voted = hasVoted(sondage.id);
+              const apartmentVoted = hasApartmentVoted(sondage.id);
               const pollResults = results[sondage.id] || [];
               const showResults = !sondage.active;
               
@@ -160,7 +194,7 @@ const Sondages = () => {
                     <CardTitle className="text-xl text-foreground">{sondage.question}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {!showResults && !voted ? (
+                    {!showResults && !apartmentVoted ? (
                       <div className="space-y-4">
                         <RadioGroup
                           value={selectedOptions[sondage.id]?.toString()}
@@ -186,10 +220,10 @@ const Sondages = () => {
                           Envoyer ma réponse
                         </Button>
                       </div>
-                    ) : voted && !showResults ? (
+                    ) : apartmentVoted && !showResults ? (
                       <div className="text-center py-4 text-muted-foreground">
                         <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-accent" />
-                        <p>Vous avez déjà voté pour ce sondage</p>
+                        <p>Un membre de votre foyer a déjà voté</p>
                       </div>
                     ) : (
                       <div className="space-y-4">

@@ -27,6 +27,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [apartmentNumber, setApartmentNumber] = useState<number | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -42,7 +43,7 @@ const Profile = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, last_name, email")
+        .select("first_name, last_name, email, apartment_number")
         .eq("id", user?.id)
         .single();
 
@@ -51,6 +52,7 @@ const Profile = () => {
       if (data) {
         setFirstName(data.first_name || "");
         setLastName(data.last_name || "");
+        setApartmentNumber(data.apartment_number);
       }
     } catch (error) {
       console.error("Error loading profile:", error);
@@ -227,6 +229,20 @@ const Profile = () => {
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Votre nom"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="apartmentNumber">Numéro d'appartement</Label>
+                <Input
+                  id="apartmentNumber"
+                  type="number"
+                  value={apartmentNumber?.toString() || ""}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Le numéro d'appartement ne peut pas être modifié
+                </p>
               </div>
 
               <Button type="submit" disabled={saving} className="w-full">
