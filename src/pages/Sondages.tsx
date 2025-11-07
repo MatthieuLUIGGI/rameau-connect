@@ -69,7 +69,6 @@ const Sondages = () => {
       }));
       setSondages(formatted);
       
-      // Fetch results for all polls
       formatted.forEach(sondage => {
         fetchResults(sondage.id, sondage.options.length);
       });
