@@ -36,9 +36,14 @@ const Sondages = () => {
     if (user) {
       fetchUserProfile();
       fetchSondages();
-      fetchUserVotes();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && apartmentNumber !== null) {
+      fetchUserVotes();
+    }
+  }, [user, apartmentNumber]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
