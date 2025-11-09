@@ -67,18 +67,20 @@ const Home = () => {
           </h1>
           
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: "400ms" }}>
-            <Link to="/actualites">
-              <Button size="lg" className="group bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                Voir les actualités
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
-                Nous contacter
-              </Button>
-            </Link>
+          <div className="flex flex-col gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: "400ms" }}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link to="/actualites">
+                <Button size="lg" className="group bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg hover:shadow-xl transition-all duration-300">
+                  Voir les actualités
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link to="/contact">
+                <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
+                  Nous contacter
+                </Button>
+              </Link>
+            </div>
             <a href="/documents/livret-accueil.pdf" target="_blank" rel="noopener noreferrer">
               <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
                 Livret d'accueil
