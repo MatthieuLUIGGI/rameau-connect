@@ -79,6 +79,11 @@ const Home = () => {
                 Nous contacter
               </Button>
             </Link>
+            <a href="/documents/livret-accueil.pdf" target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
+                Livret d'accueil
+              </Button>
+            </a>
           </div>
         </div>
 
