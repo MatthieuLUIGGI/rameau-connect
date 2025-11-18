@@ -12,12 +12,6 @@ import { z } from 'zod';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-interface LayoutConfig {
-  type: 'single' | 'two_images' | 'image_text';
-  images: string[];
-  text?: string;
-}
-
 interface Actualite {
   id: string;
   title: string;
@@ -28,7 +22,6 @@ interface Actualite {
   file_url?: string | null;
   priority: 'info' | 'normal' | 'important' | 'urgent';
   expires_at: string | null;
-  layout_config?: LayoutConfig;
 }
 
 const actualiteSchema = z.object({
@@ -59,12 +52,7 @@ const AdminActualites = () => {
     image_url: '',
     file_url: '' as string | null | '',
     priority: 'normal' as 'info' | 'normal' | 'important' | 'urgent',
-    expires_at: '',
-    layout_config: {
-      type: 'single' as 'single' | 'two_images' | 'image_text',
-      images: [] as string[],
-      text: ''
-    }
+    expires_at: ''
   });
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -94,7 +82,7 @@ const AdminActualites = () => {
     setIsUploading(true);
     
     // Validate input
-    const { file_url, priority, expires_at, layout_config, ...rest } = formData;
+    const { file_url, priority, expires_at, ...rest } = formData;
     const validation = actualiteSchema.safeParse(rest);
     if (!validation.success) {
       const errors = validation.error.errors.map(e => e.message).join(', ');
@@ -122,8 +110,7 @@ const AdminActualites = () => {
           ...rest, 
           file_url: newFileUrl, 
           priority,
-          expires_at: expires_at ? new Date(expires_at).toISOString() : null,
-          layout_config: layout_config
+          expires_at: expires_at ? new Date(expires_at).toISOString() : null
         })
         .eq('id', editingActualite.id);
       
@@ -223,16 +210,7 @@ const AdminActualites = () => {
   };
 
   const resetForm = () => {
-    setFormData({ 
-      title: '', 
-      excerpt: '', 
-      content: '', 
-      image_url: '', 
-      file_url: '', 
-      priority: 'normal', 
-      expires_at: '',
-      layout_config: { type: 'single', images: [], text: '' }
-    });
+    setFormData({ title: '', excerpt: '', content: '', image_url: '', file_url: '', priority: 'normal', expires_at: '' });
     setFile(null);
     setEditingActualite(null);
     setIsOpen(false);
@@ -247,12 +225,7 @@ const AdminActualites = () => {
       image_url: actualite.image_url || '',
       file_url: actualite.file_url || '',
       priority: actualite.priority,
-      expires_at: actualite.expires_at ? new Date(actualite.expires_at).toISOString().split('T')[0] : '',
-      layout_config: { 
-        type: actualite.layout_config?.type || 'single', 
-        images: actualite.layout_config?.images || [], 
-        text: actualite.layout_config?.text || '' 
-      }
+      expires_at: actualite.expires_at ? new Date(actualite.expires_at).toISOString().split('T')[0] : ''
     });
     setFile(null);
     setIsOpen(true);
@@ -383,130 +356,14 @@ const AdminActualites = () => {
                   onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                 />
               </div>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="layout_type">Type de mise en page</Label>
-                  <select
-                    id="layout_type"
-                    value={formData.layout_config.type}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      layout_config: { 
-                        ...formData.layout_config, 
-                        type: e.target.value as 'single' | 'two_images' | 'image_text',
-                        images: e.target.value === 'single' && formData.layout_config.images.length > 1 
-                          ? [formData.layout_config.images[0]] 
-                          : formData.layout_config.images
-                      }
-                    })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <option value="single">Image unique</option>
-                    <option value="two_images">2 images côte à côte</option>
-                    <option value="image_text">Image + texte à droite</option>
-                  </select>
-                </div>
-
-                {formData.layout_config.type === 'single' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="image_1">URL de l'image</Label>
-                    <Input
-                      id="image_1"
-                      type="url"
-                      placeholder="https://exemple.com/image.jpg"
-                      value={formData.layout_config.images[0] || ''}
-                      onChange={(e) => setFormData({ 
-                        ...formData, 
-                        layout_config: { 
-                          ...formData.layout_config, 
-                          images: [e.target.value]
-                        }
-                      })}
-                    />
-                  </div>
-                )}
-
-                {formData.layout_config.type === 'two_images' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="image_1">URL de l'image 1</Label>
-                      <Input
-                        id="image_1"
-                        type="url"
-                        placeholder="https://exemple.com/image1.jpg"
-                        value={formData.layout_config.images[0] || ''}
-                        onChange={(e) => {
-                          const newImages = [...formData.layout_config.images];
-                          newImages[0] = e.target.value;
-                          setFormData({ 
-                            ...formData, 
-                            layout_config: { 
-                              ...formData.layout_config, 
-                              images: newImages
-                            }
-                          });
-                        }}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="image_2">URL de l'image 2</Label>
-                      <Input
-                        id="image_2"
-                        type="url"
-                        placeholder="https://exemple.com/image2.jpg"
-                        value={formData.layout_config.images[1] || ''}
-                        onChange={(e) => {
-                          const newImages = [...formData.layout_config.images];
-                          newImages[1] = e.target.value;
-                          setFormData({ 
-                            ...formData, 
-                            layout_config: { 
-                              ...formData.layout_config, 
-                              images: newImages
-                            }
-                          });
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {formData.layout_config.type === 'image_text' && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="image_1">URL de l'image (gauche)</Label>
-                      <Input
-                        id="image_1"
-                        type="url"
-                        placeholder="https://exemple.com/image.jpg"
-                        value={formData.layout_config.images[0] || ''}
-                        onChange={(e) => setFormData({ 
-                          ...formData, 
-                          layout_config: { 
-                            ...formData.layout_config, 
-                            images: [e.target.value]
-                          }
-                        })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="layout_text">Texte (droite)</Label>
-                      <textarea
-                        id="layout_text"
-                        placeholder="Texte qui apparaîtra à droite de l'image..."
-                        value={formData.layout_config.text || ''}
-                        onChange={(e) => setFormData({ 
-                          ...formData, 
-                          layout_config: { 
-                            ...formData.layout_config, 
-                            text: e.target.value
-                          }
-                        })}
-                        className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      />
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="image_url">URL de l'image</Label>
+                <Input
+                  id="image_url"
+                  type="url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
