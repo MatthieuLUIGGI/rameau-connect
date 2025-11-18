@@ -7,6 +7,12 @@ import { Calendar, User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
+interface LayoutConfig {
+  type: 'single' | 'two_images' | 'image_text';
+  images: string[];
+  text?: string;
+}
+
 interface Actualite {
   id: string;
   title: string;
@@ -17,6 +23,7 @@ interface Actualite {
   file_url?: string | null;
   priority: 'info' | 'normal' | 'important' | 'urgent';
   expires_at: string | null;
+  layout_config?: LayoutConfig;
 }
 
 const ActualiteDetail = () => {
@@ -123,7 +130,54 @@ const ActualiteDetail = () => {
               </p>
             )}
             
-            {actualite.image_url && (
+            {/* Affichage des images selon la mise en page */}
+            {actualite.layout_config && actualite.layout_config.images.length > 0 && (
+              <div className="space-y-4">
+                {actualite.layout_config.type === 'single' && (
+                  <div className="rounded-lg overflow-hidden border border-border">
+                    <img 
+                      src={actualite.layout_config.images[0]} 
+                      alt={actualite.title}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
+
+                {actualite.layout_config.type === 'two_images' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {actualite.layout_config.images.slice(0, 2).map((img, idx) => (
+                      <div key={idx} className="rounded-lg overflow-hidden border border-border">
+                        <img 
+                          src={img} 
+                          alt={`${actualite.title} - Image ${idx + 1}`}
+                          className="w-full h-auto object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {actualite.layout_config.type === 'image_text' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <div className="rounded-lg overflow-hidden border border-border">
+                      <img 
+                        src={actualite.layout_config.images[0]} 
+                        alt={actualite.title}
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                    <div className="prose prose-lg dark:prose-invert">
+                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                        {actualite.layout_config.text}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Fallback pour les anciennes actualités avec image_url */}
+            {actualite.image_url && (!actualite.layout_config || actualite.layout_config.images.length === 0) && (
               <div className="rounded-lg overflow-hidden border border-border">
                 <img 
                   src={actualite.image_url} 

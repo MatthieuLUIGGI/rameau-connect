@@ -22,6 +22,7 @@ export type Database = {
           excerpt: string | null
           id: string
           image_url: string | null
+          layout_config: Json | null
           published_at: string | null
           title: string
           updated_at: string | null
@@ -33,6 +34,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          layout_config?: Json | null
           published_at?: string | null
           title: string
           updated_at?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          layout_config?: Json | null
           published_at?: string | null
           title?: string
           updated_at?: string | null
