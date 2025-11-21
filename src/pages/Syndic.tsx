@@ -87,8 +87,8 @@ const Syndic = () => {
                     <p className="text-muted-foreground font-medium">{member.position}</p>
                     {(member.phone || member.email || member.address || member.gestionnaire || member.assistante) && (
                       <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-                        {member.gestionnaire && <p>Gestionnaire : {member.gestionnaire}</p>}
-                        {member.assistante && <p>Assistante : {member.assistante}</p>}
+                        {member.level === 1 && member.gestionnaire && <p>Gestionnaire : {member.gestionnaire}</p>}
+                        {member.level === 1 && member.assistante && <p>Assistante : {member.assistante}</p>}
                         {member.phone && <p>Tél. {member.phone}</p>}
                         {member.email && <p>{member.email}</p>}
                         {member.address && <p>{member.address}</p>}
@@ -123,10 +123,8 @@ const Syndic = () => {
                     <div>
                       <h3 className="text-lg font-semibold mb-1 text-foreground">{member.name}</h3>
                       <p className="text-sm text-muted-foreground">{member.position}</p>
-                      {(member.phone || member.email || member.address || member.gestionnaire || member.assistante) && (
+                      {(member.phone || member.email || member.address) && (
                         <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                          {member.gestionnaire && <p>Gestionnaire : {member.gestionnaire}</p>}
-                          {member.assistante && <p>Assistante : {member.assistante}</p>}
                           {member.phone && <p>Tél. {member.phone}</p>}
                           {member.email && <p>{member.email}</p>}
                           {member.address && <p>{member.address}</p>}

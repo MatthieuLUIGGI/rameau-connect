@@ -306,26 +306,28 @@ const AdminAssemblee = () => {
                   placeholder="N°, rue, code postal, ville"
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="gestionnaire">Gestionnaire</Label>
-                  <Input
-                    id="gestionnaire"
-                    value={formData.gestionnaire}
-                    onChange={(e) => setFormData({ ...formData, gestionnaire: e.target.value })}
-                    placeholder="Prénom du gestionnaire"
-                  />
+              {formData.level === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gestionnaire">Gestionnaire</Label>
+                    <Input
+                      id="gestionnaire"
+                      value={formData.gestionnaire}
+                      onChange={(e) => setFormData({ ...formData, gestionnaire: e.target.value })}
+                      placeholder="Prénom du gestionnaire"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="assistante">Assistante</Label>
+                    <Input
+                      id="assistante"
+                      value={formData.assistante}
+                      onChange={(e) => setFormData({ ...formData, assistante: e.target.value })}
+                      placeholder="Nom de l'assistante"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="assistante">Assistante</Label>
-                  <Input
-                    id="assistante"
-                    value={formData.assistante}
-                    onChange={(e) => setFormData({ ...formData, assistante: e.target.value })}
-                    placeholder="Nom de l'assistante"
-                  />
-                </div>
-              </div>
+              )}
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Annuler
@@ -352,10 +354,10 @@ const AdminAssemblee = () => {
                     <CardTitle>{membre.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">{membre.position}</p>
                     <p className="text-xs text-muted-foreground">Niveau {membre.level}</p>
-                    {(membre.phone || membre.email || membre.address || membre.gestionnaire || membre.assistante) && (
+                    {(membre.phone || membre.email || membre.address || (membre.level === 1 && (membre.gestionnaire || membre.assistante))) && (
                       <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                        {membre.gestionnaire && <p>Gestionnaire : {membre.gestionnaire}</p>}
-                        {membre.assistante && <p>Assistante : {membre.assistante}</p>}
+                        {membre.level === 1 && membre.gestionnaire && <p>Gestionnaire : {membre.gestionnaire}</p>}
+                        {membre.level === 1 && membre.assistante && <p>Assistante : {membre.assistante}</p>}
                         {membre.phone && <p>Tél. {membre.phone}</p>}
                         {membre.email && <p>Email: {membre.email}</p>}
                         {membre.address && <p>Adresse: {membre.address}</p>}
