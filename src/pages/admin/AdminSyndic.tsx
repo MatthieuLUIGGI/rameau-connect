@@ -19,6 +19,8 @@ interface Membre {
   phone?: string | null;
   email?: string | null;
   address?: string | null;
+  gestionnaire?: string | null;
+  assistante?: string | null;
 }
 
 const membreSchema = z.object({
@@ -28,7 +30,9 @@ const membreSchema = z.object({
   photo_url: z.string().trim().max(2048, "L'URL ne peut pas dépasser 2048 caractères").url("URL invalide").optional().or(z.literal('')),
   phone: z.string().trim().max(50, "Téléphone trop long").optional().or(z.literal('')),
   email: z.string().trim().email("Email invalide").optional().or(z.literal('')),
-  address: z.string().trim().max(255, "Adresse trop longue").optional().or(z.literal(''))
+  address: z.string().trim().max(255, "Adresse trop longue").optional().or(z.literal('')),
+  gestionnaire: z.string().trim().max(100, "Gestionnaire trop long").optional().or(z.literal('')),
+  assistante: z.string().trim().max(100, "Assistante trop long").optional().or(z.literal(''))
 });
 
 const AdminAssemblee = () => {
@@ -44,7 +48,9 @@ const AdminAssemblee = () => {
     photo_url: '',
     phone: '',
     email: '',
-    address: ''
+    address: '',
+    gestionnaire: '',
+    assistante: ''
   });
   const { toast } = useToast();
 
@@ -122,7 +128,7 @@ const AdminAssemblee = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', position: '', level: 1, photo_url: '', phone: '', email: '', address: '' });
+    setFormData({ name: '', position: '', level: 1, photo_url: '', phone: '', email: '', address: '', gestionnaire: '', assistante: '' });
     setEditingMembre(null);
     setIsOpen(false);
   };
@@ -136,7 +142,9 @@ const AdminAssemblee = () => {
       photo_url: membre.photo_url || '',
       phone: membre.phone || '',
       email: membre.email || '',
-      address: membre.address || ''
+      address: membre.address || '',
+      gestionnaire: membre.gestionnaire || '',
+      assistante: membre.assistante || ''
     });
     setIsOpen(true);
   };
@@ -298,6 +306,26 @@ const AdminAssemblee = () => {
                   placeholder="N°, rue, code postal, ville"
                 />
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="gestionnaire">Gestionnaire</Label>
+                  <Input
+                    id="gestionnaire"
+                    value={formData.gestionnaire}
+                    onChange={(e) => setFormData({ ...formData, gestionnaire: e.target.value })}
+                    placeholder="Prénom du gestionnaire"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assistante">Assistante</Label>
+                  <Input
+                    id="assistante"
+                    value={formData.assistante}
+                    onChange={(e) => setFormData({ ...formData, assistante: e.target.value })}
+                    placeholder="Nom de l'assistante"
+                  />
+                </div>
+              </div>
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Annuler
@@ -324,8 +352,10 @@ const AdminAssemblee = () => {
                     <CardTitle>{membre.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">{membre.position}</p>
                     <p className="text-xs text-muted-foreground">Niveau {membre.level}</p>
-                    {(membre.phone || membre.email || membre.address) && (
+                    {(membre.phone || membre.email || membre.address || membre.gestionnaire || membre.assistante) && (
                       <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        {membre.gestionnaire && <p>Gestionnaire : {membre.gestionnaire}</p>}
+                        {membre.assistante && <p>Assistante : {membre.assistante}</p>}
                         {membre.phone && <p>Tél. {membre.phone}</p>}
                         {membre.email && <p>Email: {membre.email}</p>}
                         {membre.address && <p>Adresse: {membre.address}</p>}

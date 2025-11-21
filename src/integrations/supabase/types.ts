@@ -22,6 +22,7 @@ export type Database = {
           excerpt: string | null
           id: string
           image_url: string | null
+          layout_config: Json | null
           published_at: string | null
           title: string
           updated_at: string | null
@@ -33,6 +34,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          layout_config?: Json | null
           published_at?: string | null
           title: string
           updated_at?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           image_url?: string | null
+          layout_config?: Json | null
           published_at?: string | null
           title?: string
           updated_at?: string | null
@@ -118,7 +121,9 @@ export type Database = {
       }
       membres_assemblee: {
         Row: {
+          assistante: string | null
           created_at: string | null
+          gestionnaire: string | null
           id: string
           level: number
           name: string
@@ -127,7 +132,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assistante?: string | null
           created_at?: string | null
+          gestionnaire?: string | null
           id?: string
           level?: number
           name: string
@@ -136,7 +143,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assistante?: string | null
           created_at?: string | null
+          gestionnaire?: string | null
           id?: string
           level?: number
           name?: string
