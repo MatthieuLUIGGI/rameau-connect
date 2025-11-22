@@ -79,6 +79,9 @@ const Navigation = () => {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
+                        <Link to="/membres">Nombre membres</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Link to="/admin/badges-vigik">Gérer les badges Vigik</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -160,6 +163,13 @@ const Navigation = () => {
                   </Link>
                   {isAG && (
                     <>
+                      <Link
+                        to="/membres"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Nombre membres</span>
+                      </Link>
                       <Link
                         to="/admin/badges-vigik"
                         onClick={() => setIsOpen(false)}
