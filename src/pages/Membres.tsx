@@ -61,7 +61,7 @@ const Membres = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-8">
       <h1 className="text-4xl font-bold mb-8">Membres inscrits</h1>
 
       <Card className="mb-8">
