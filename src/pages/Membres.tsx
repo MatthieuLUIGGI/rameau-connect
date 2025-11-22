@@ -79,7 +79,7 @@ const Membres = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Liste des membres</CardTitle>
           <CardDescription>
@@ -117,7 +117,7 @@ const Membres = () => {
             </TableBody>
           </Table>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };
