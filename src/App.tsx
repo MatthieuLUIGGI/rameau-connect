@@ -23,6 +23,7 @@ import AdminSondages from "./pages/admin/AdminSondages";
 import AdminAG from "./pages/admin/AdminAG";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
+import Membres from "./pages/Membres";
 import NotFound from "./pages/NotFound";
 import { Analytics } from "@vercel/analytics/react";
 import { CookieConsentProvider, useCookieConsent } from "@/contexts/CookieConsentContext";
@@ -62,6 +63,7 @@ const App = () => (
                 <Route path="/sondages" element={<ProtectedRoute><Sondages /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/membres" element={<ProtectedRoute requireAG><Membres /></ProtectedRoute>} />
                 <Route path="/admin/badges-vigik" element={<ProtectedRoute requireAG><AdminBadgesVigik /></ProtectedRoute>} />
                 <Route path="/admin/syndic" element={<ProtectedRoute requireAG><AdminSyndic /></ProtectedRoute>} />
                 <Route path="/admin/actualites" element={<ProtectedRoute requireAG><AdminActualites /></ProtectedRoute>} />
