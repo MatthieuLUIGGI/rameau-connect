@@ -24,6 +24,7 @@ const Actualites = () => {
   const [actualites, setActualites] = useState<Actualite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
   // Transforme le contenu HTML en texte brut pour l'aperçu (liste)
@@ -45,13 +46,34 @@ const Actualites = () => {
 
   useEffect(() => {
     fetchActualites();
-  }, []);
+  }, [currentPage]);
 
   const fetchActualites = async () => {
+    setIsLoading(true);
+    
+    // Calculer l'offset pour la pagination
+    const from = (currentPage - 1) * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
+
+    // Récupérer le total pour la pagination
+    const { count, error: countError } = await supabase
+      .from('actualites')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      toast({ title: 'Erreur', description: countError.message, variant: 'destructive' });
+      setIsLoading(false);
+      return;
+    }
+    
+    setTotalCount(count || 0);
+
+    // Récupérer uniquement les actualités de la page courante
     const { data, error } = await supabase
       .from('actualites')
       .select('*')
-      .order('published_at', { ascending: false });
+      .order('published_at', { ascending: false })
+      .range(from, to);
     
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -115,13 +137,11 @@ const Actualites = () => {
         ) : (
           <div className="max-w-2xl mx-auto space-y-4">
             {(() => {
-              const totalPages = Math.ceil(actualites.length / ITEMS_PER_PAGE);
-              const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-              const paginatedActualites = actualites.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+              const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
               
               return (
                 <>
-                  {paginatedActualites.map((article, index) => {
+                  {actualites.map((article, index) => {
               const priorityStyles = {
                 urgent: 'border-red-600 bg-red-50 dark:bg-red-950/30 shadow-lg shadow-red-500/20',
                 important: 'border-red-500 bg-red-50 dark:bg-red-950/20',
