@@ -76,11 +76,17 @@ const Syndic = () => {
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <CardContent className="p-6 text-center">
-                    <div className="w-20 h-20 rounded-full bg-primary mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                    <div className="w-24 h-24 rounded-full bg-primary mx-auto mb-4 flex items-center justify-center overflow-hidden">
                       {member.photo_url ? (
-                        <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
+                        <img 
+                          src={member.photo_url} 
+                          alt={member.name} 
+                          className="w-full h-full object-cover"
+                          style={{ imageRendering: 'auto' }}
+                          loading="eager"
+                        />
                       ) : (
-                        <User className="h-10 w-10 text-primary-foreground" />
+                        <User className="h-12 w-12 text-primary-foreground" />
                       )}
                     </div>
                     <h3 className="text-xl font-semibold mb-1 text-foreground">{member.name}</h3>
@@ -113,11 +119,17 @@ const Syndic = () => {
                   style={{ animationDelay: `${(index + 3) * 100}ms` }}
                 >
                   <CardContent className="p-6 flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {member.photo_url ? (
-                        <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
+                        <img 
+                          src={member.photo_url} 
+                          alt={member.name} 
+                          className="w-full h-full object-cover"
+                          style={{ imageRendering: 'auto' }}
+                          loading="eager"
+                        />
                       ) : (
-                        <User className="h-8 w-8 text-secondary-foreground" />
+                        <User className="h-10 w-10 text-secondary-foreground" />
                       )}
                     </div>
                     <div>

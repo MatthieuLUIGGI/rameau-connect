@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User, ArrowRight } from "lucide-react";
+import { Calendar, User, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface Actualite {
   id: string;
@@ -17,9 +18,12 @@ interface Actualite {
   expires_at: string | null;
 }
 
+const ITEMS_PER_PAGE = 5;
+
 const Actualites = () => {
   const [actualites, setActualites] = useState<Actualite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   // Transforme le contenu HTML en texte brut pour l'aperçu (liste)
@@ -110,7 +114,14 @@ const Actualites = () => {
           </div>
         ) : (
           <div className="max-w-2xl mx-auto space-y-4">
-            {actualites.map((article, index) => {
+            {(() => {
+              const totalPages = Math.ceil(actualites.length / ITEMS_PER_PAGE);
+              const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+              const paginatedActualites = actualites.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+              
+              return (
+                <>
+                  {paginatedActualites.map((article, index) => {
               const priorityStyles = {
                 urgent: 'border-red-600 bg-red-50 dark:bg-red-950/30 shadow-lg shadow-red-500/20',
                 important: 'border-red-500 bg-red-50 dark:bg-red-950/20',
@@ -226,7 +237,49 @@ const Actualites = () => {
                 </div>
               </Card>
               );
-            })}
+                  })}
+                  
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 pt-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Précédent
+                      </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            className="w-8 h-8 p-0"
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Suivant
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>
