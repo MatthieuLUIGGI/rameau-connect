@@ -352,8 +352,17 @@ const AdminActualites = () => {
       setIsUploadingImage(true);
       const uploadedUrl = await uploadOptimizedImage(selectedFile);
       if (uploadedUrl) {
-        setFormData(prev => ({ ...prev, image_url: uploadedUrl }));
+        // Insérer l'image dans le contenu de l'éditeur
+        const imageHtml = `<p><img src="${uploadedUrl}" alt="Image de l'actualité" style="max-width: 100%; height: auto;" /></p>`;
+        setFormData(prev => ({ 
+          ...prev, 
+          content: prev.content + imageHtml 
+        }));
         setImageFile(selectedFile);
+        toast({ 
+          title: 'Image ajoutée', 
+          description: 'L\'image a été insérée dans le contenu',
+        });
       }
       setIsUploadingImage(false);
     }
