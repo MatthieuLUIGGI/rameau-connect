@@ -157,14 +157,12 @@ const AdminAssemblee = () => {
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/avif'].includes(file.type)) {
-      toast({ title: 'Fichier invalide', description: 'Formats autorisés: JPG, PNG, WEBP, AVIF', variant: 'destructive' });
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/avif', 'image/gif', 'image/bmp', 'image/tiff'].includes(file.type)) {
+      toast({ title: 'Fichier invalide', description: 'Formats autorisés: JPG, PNG, WEBP, AVIF, GIF, BMP, TIFF', variant: 'destructive' });
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ title: 'Fichier trop volumineux', description: 'Taille maximale 10 Mo', variant: 'destructive' });
-      return;
-    }
+    
+    // Pas de limite de taille - la compression automatique gère les fichiers lourds
 
     setUploading(true);
     
@@ -172,7 +170,7 @@ const AdminAssemblee = () => {
       let fileToUpload: Blob = file;
       let extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       
-      // Optimiser l'image si nécessaire
+      // Compression automatique de l'image (toujours appliquée pour les formats non optimisés)
       if (needsOptimization(file)) {
         const result = await optimizeImage(file);
         fileToUpload = result.blob;
@@ -180,7 +178,7 @@ const AdminAssemblee = () => {
         
         const reduction = calculateReduction(result.originalSize, result.optimizedSize);
         toast({ 
-          title: '🌿 Image optimisée', 
+          title: '🌿 Image optimisée automatiquement', 
           description: `Réduction de ${reduction}% (${formatFileSize(result.originalSize)} → ${formatFileSize(result.optimizedSize)})`,
         });
       }
