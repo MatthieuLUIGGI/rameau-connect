@@ -339,23 +339,16 @@ const AdminActualites = () => {
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/avif', 'image/gif'].includes(selectedFile.type)) {
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/avif', 'image/gif', 'image/bmp', 'image/tiff'].includes(selectedFile.type)) {
         toast({ 
           title: 'Erreur', 
-          description: 'Formats autorisés: JPG, PNG, WEBP, AVIF, GIF', 
-          variant: 'destructive' 
-        });
-        return;
-      }
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        toast({ 
-          title: 'Erreur', 
-          description: 'Le fichier ne doit pas dépasser 10 MB', 
+          description: 'Formats autorisés: JPG, PNG, WEBP, AVIF, GIF, BMP, TIFF', 
           variant: 'destructive' 
         });
         return;
       }
       
+      // Pas de limite de taille - la compression automatique gère les fichiers lourds
       setIsUploadingImage(true);
       const uploadedUrl = await uploadOptimizedImage(selectedFile);
       if (uploadedUrl) {
