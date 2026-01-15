@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, UploadCloud, Image as ImageIcon, X as XIcon } from 'lucide-react';
+import { Pencil, Trash2, Plus, UploadCloud, Image as ImageIcon, X as XIcon, Leaf } from 'lucide-react';
 import { z } from 'zod';
+import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from '@/lib/imageOptimizer';
 
 interface Membre {
   id: string;
@@ -149,36 +150,61 @@ const AdminAssemblee = () => {
     setIsOpen(true);
   };
 
-  const randomName = (original: File) => {
-    const ext = original.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const randomName = (extension: string) => {
     const rand = Math.random().toString(36).slice(2, 10);
-    return `membre-${Date.now()}-${rand}.${ext}`;
+    return `membre-${Date.now()}-${rand}.${extension}`;
   };
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
-      toast({ title: 'Fichier invalide', description: 'Formats autorisés: JPG, PNG, WEBP', variant: 'destructive' });
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/avif'].includes(file.type)) {
+      toast({ title: 'Fichier invalide', description: 'Formats autorisés: JPG, PNG, WEBP, AVIF', variant: 'destructive' });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Fichier trop volumineux', description: 'Taille maximale 5 Mo', variant: 'destructive' });
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'Fichier trop volumineux', description: 'Taille maximale 10 Mo', variant: 'destructive' });
       return;
     }
 
     setUploading(true);
-    const path = randomName(file);
-    const { error: upErr } = await supabase.storage.from('membres-photos').upload(path, file, { cacheControl: '3600', upsert: false });
-    if (upErr) {
-      setUploading(false);
-      toast({ title: 'Upload échoué', description: upErr.message, variant: 'destructive' });
-      return;
-    }
+    
+    try {
+      let fileToUpload: Blob = file;
+      let extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      
+      // Optimiser l'image si nécessaire
+      if (needsOptimization(file)) {
+        const result = await optimizeImage(file);
+        fileToUpload = result.blob;
+        extension = result.extension;
+        
+        const reduction = calculateReduction(result.originalSize, result.optimizedSize);
+        toast({ 
+          title: '🌿 Image optimisée', 
+          description: `Réduction de ${reduction}% (${formatFileSize(result.originalSize)} → ${formatFileSize(result.optimizedSize)})`,
+        });
+      }
+      
+      const path = randomName(extension);
+      const { error: upErr } = await supabase.storage.from('membres-photos').upload(path, fileToUpload, { 
+        cacheControl: '3600', 
+        upsert: false,
+        contentType: `image/${extension === 'jpg' ? 'jpeg' : extension}`
+      });
+      
+      if (upErr) {
+        toast({ title: 'Upload échoué', description: upErr.message, variant: 'destructive' });
+        return;
+      }
 
-    const { data: pub } = supabase.storage.from('membres-photos').getPublicUrl(path);
-    setFormData((prev) => ({ ...prev, photo_url: pub.publicUrl }));
-    setUploading(false);
-    toast({ title: 'Photo téléchargée', description: 'Aperçu mis à jour' });
+      const { data: pub } = supabase.storage.from('membres-photos').getPublicUrl(path);
+      setFormData((prev) => ({ ...prev, photo_url: pub.publicUrl }));
+      toast({ title: 'Photo téléchargée', description: 'Aperçu mis à jour' });
+    } catch (error) {
+      toast({ title: 'Erreur', description: 'Impossible d\'optimiser l\'image', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const onDrop = async (e: React.DragEvent<HTMLDivElement>) => {

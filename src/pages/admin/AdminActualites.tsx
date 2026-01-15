@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Plus, Upload, Loader2, Leaf, ImageIcon } from 'lucide-react';
 import { z } from 'zod';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from '@/lib/imageOptimizer';
 
 interface Actualite {
   id: string;
@@ -55,6 +56,8 @@ const AdminActualites = () => {
     expires_at: ''
   });
   const [file, setFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState(false);
   const { user } = useAuth();
@@ -212,6 +215,7 @@ const AdminActualites = () => {
   const resetForm = () => {
     setFormData({ title: '', excerpt: '', content: '', image_url: '', file_url: '', priority: 'normal', expires_at: '' });
     setFile(null);
+    setImageFile(null);
     setEditingActualite(null);
     setIsOpen(false);
   };
@@ -273,6 +277,93 @@ const AdminActualites = () => {
       .getPublicUrl(filePath);
 
     return publicUrl;
+  };
+
+  const uploadOptimizedImage = async (file: File): Promise<string | null> => {
+    try {
+      let fileToUpload: Blob = file;
+      let extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      
+      // Optimiser l'image si nécessaire
+      if (needsOptimization(file)) {
+        const result = await optimizeImage(file);
+        fileToUpload = result.blob;
+        extension = result.extension;
+        
+        const reduction = calculateReduction(result.originalSize, result.optimizedSize);
+        toast({ 
+          title: '🌿 Image optimisée', 
+          description: `Réduction de ${reduction}% (${formatFileSize(result.originalSize)} → ${formatFileSize(result.optimizedSize)})`,
+        });
+      }
+      
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${extension}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('actualites-images')
+        .upload(fileName, fileToUpload, {
+          contentType: `image/${extension === 'jpg' ? 'jpeg' : extension}`
+        });
+
+      if (uploadError) {
+        // Si le bucket n'existe pas, utiliser actualites-files
+        const { error: fallbackError } = await supabase.storage
+          .from('actualites-files')
+          .upload(`images/${fileName}`, fileToUpload, {
+            contentType: `image/${extension === 'jpg' ? 'jpeg' : extension}`
+          });
+        
+        if (fallbackError) {
+          toast({ title: 'Erreur', description: fallbackError.message, variant: 'destructive' });
+          return null;
+        }
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('actualites-files')
+          .getPublicUrl(`images/${fileName}`);
+        
+        return publicUrl;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('actualites-images')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      toast({ title: 'Erreur', description: 'Impossible d\'optimiser l\'image', variant: 'destructive' });
+      return null;
+    }
+  };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/avif', 'image/gif'].includes(selectedFile.type)) {
+        toast({ 
+          title: 'Erreur', 
+          description: 'Formats autorisés: JPG, PNG, WEBP, AVIF, GIF', 
+          variant: 'destructive' 
+        });
+        return;
+      }
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        toast({ 
+          title: 'Erreur', 
+          description: 'Le fichier ne doit pas dépasser 10 MB', 
+          variant: 'destructive' 
+        });
+        return;
+      }
+      
+      setIsUploadingImage(true);
+      const uploadedUrl = await uploadOptimizedImage(selectedFile);
+      if (uploadedUrl) {
+        setFormData(prev => ({ ...prev, image_url: uploadedUrl }));
+        setImageFile(selectedFile);
+      }
+      setIsUploadingImage(false);
+    }
   };
 
   const extractPathFromPublicUrl = (url: string): string | null => {
@@ -357,13 +448,67 @@ const AdminActualites = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="image_url">URL de l'image</Label>
-                <Input
-                  id="image_url"
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                />
+                <Label className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Image de l'actualité
+                  <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                    <Leaf className="h-3 w-3" />
+                    Éco-optimisée
+                  </span>
+                </Label>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="image_file"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+                      onChange={handleImageFileChange}
+                      className="cursor-pointer"
+                      disabled={isUploadingImage}
+                    />
+                    {isUploadingImage && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Optimisation...
+                      </div>
+                    )}
+                  </div>
+                  {formData.image_url && (
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={formData.image_url} 
+                        alt="Aperçu" 
+                        className="h-16 w-24 object-cover rounded-md border"
+                      />
+                      <span className="text-xs text-muted-foreground truncate max-w-xs">
+                        {formData.image_url}
+                      </span>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">ou</span>
+                    <Input
+                      id="image_url"
+                      type="url"
+                      placeholder="URL de l'image (https://...)"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Leaf className="h-3 w-3 text-green-600" />
+                    Les images sont automatiquement compressées et converties en AVIF/WebP pour réduire l'empreinte carbone
+                  </p>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
