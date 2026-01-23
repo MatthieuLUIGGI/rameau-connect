@@ -143,6 +143,57 @@ export type Database = {
         }
         Relationships: []
       }
+      comptes_rendus_conseil_syndical: {
+        Row: {
+          author_id: string | null
+          created_at: string | null
+          date: string
+          file_url: string
+          id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string | null
+          date: string
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string | null
+          date?: string
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      conseil_syndical_config: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       membres_assemblee: {
         Row: {
           assistante: string | null

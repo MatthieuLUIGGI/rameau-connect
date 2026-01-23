@@ -16,11 +16,13 @@ import Actualites from "./pages/Actualites";
 import ActualiteDetail from "./pages/ActualiteDetail";
 import Sondages from "./pages/Sondages";
 import AG from "./pages/AG";
+import ConseilSyndical from "./pages/ConseilSyndical";
 import AdminBadgesVigik from "./pages/admin/AdminBadgesVigik";
 import AdminSyndic from "./pages/admin/AdminSyndic";
 import AdminActualites from "./pages/admin/AdminActualites";
 import AdminSondages from "./pages/admin/AdminSondages";
 import AdminAG from "./pages/admin/AdminAG";
+import AdminConseilSyndical from "./pages/admin/AdminConseilSyndical";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Membres from "./pages/Membres";
@@ -60,6 +62,7 @@ const App = () => (
                 <Route path="/actualites" element={<ProtectedRoute><Actualites /></ProtectedRoute>} />
                 <Route path="/actualites/:id" element={<ProtectedRoute><ActualiteDetail /></ProtectedRoute>} />
                 <Route path="/ag" element={<ProtectedRoute><AG /></ProtectedRoute>} />
+                <Route path="/conseil-syndical" element={<ProtectedRoute><ConseilSyndical /></ProtectedRoute>} />
                 <Route path="/sondages" element={<ProtectedRoute><Sondages /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -68,6 +71,7 @@ const App = () => (
                 <Route path="/admin/syndic" element={<ProtectedRoute requireAG><AdminSyndic /></ProtectedRoute>} />
                 <Route path="/admin/actualites" element={<ProtectedRoute requireAG><AdminActualites /></ProtectedRoute>} />
                 <Route path="/admin/ag" element={<ProtectedRoute requireAG><AdminAG /></ProtectedRoute>} />
+                <Route path="/admin/conseil-syndical" element={<ProtectedRoute requireAG><AdminConseilSyndical /></ProtectedRoute>} />
                 <Route path="/admin/sondages" element={<ProtectedRoute requireAG><AdminSondages /></ProtectedRoute>} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route path="/confidentialite" element={<Confidentialite />} />
