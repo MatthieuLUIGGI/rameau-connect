@@ -169,16 +169,16 @@ const Sondages = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-8 md:mb-12 animate-fade-in">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
-            Sondages
+            Consultations
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-4">
-            Participez aux sondages et exprimez votre opinion sur les décisions de la copropriété
+            Participez aux consultations et exprimez votre opinion sur les décisions de la copropriété
           </p>
         </div>
 
         {sondages.length === 0 ? (
           <div className="text-center text-muted-foreground">
-            Aucun sondage actif pour le moment.
+            Aucune consultation active pour le moment.
           </div>
         ) : (
           <div className="max-w-3xl mx-auto space-y-8">
@@ -233,7 +233,7 @@ const Sondages = () => {
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 text-accent mb-4">
                           <CheckCircle2 className="h-5 w-5" />
-                          <span className="font-medium">Sondage terminé - Résultats</span>
+                          <span className="font-medium">Consultation terminée - Résultats</span>
                         </div>
                         
                         <div className="space-y-3">

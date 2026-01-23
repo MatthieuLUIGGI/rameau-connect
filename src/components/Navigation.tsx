@@ -25,8 +25,8 @@ const Navigation = () => {
     { path: "/syndic", label: "Syndic", icon: Users },
     { path: "/actualites", label: "Actualités", icon: Newspaper },
     { path: "/ag", label: "AG", icon: BarChart3 },
-    { path: "/sondages", label: "Sondages", icon: BarChart3 },
-    { path: "/contact", label: "Contact", icon: Mail },
+    { path: "/sondages", label: "Consultations", icon: BarChart3 },
+    { path: "/contact", label: "Contactez-nous", icon: Mail },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -94,7 +94,7 @@ const Navigation = () => {
                         <Link to="/admin/actualites">Gérer les actualités</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/admin/sondages">Gérer les sondages</Link>
+                        <Link to="/admin/sondages">Gérer les consultations</Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
@@ -203,7 +203,7 @@ const Navigation = () => {
                         onClick={() => setIsOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
                       >
-                        <span className="font-medium">Gérer les sondages</span>
+                        <span className="font-medium">Gérer les consultations</span>
                       </Link>
                     </>
                   )}
