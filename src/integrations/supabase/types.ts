@@ -89,6 +89,30 @@ export type Database = {
         }
         Relationships: []
       }
+      badges_vigik_stock: {
+        Row: {
+          created_at: string
+          id: string
+          info_text: string | null
+          price: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          info_text?: string | null
+          price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          info_text?: string | null
+          price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comptes_rendus_ag: {
         Row: {
           author_id: string | null

@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { KeyRound, Calendar } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface StockRow {
   id: string;
-  available_count: number;
-  next_reception_date: string | null; // ISO date string (YYYY-MM-DD)
-  price: string | null; // numeric returned as string
+  info_text: string | null;
+  price: string | null;
 }
 
 const BadgesVigik = () => {
@@ -30,19 +29,9 @@ const BadgesVigik = () => {
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
-  setStock((data as unknown as StockRow) ?? null);
+      setStock((data as unknown as StockRow) ?? null);
     }
     setIsLoading(false);
-  };
-
-  const formatDate = (d?: string | null) => {
-    if (!d) return null;
-    try {
-      const date = new Date(d);
-      return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
-    } catch {
-      return d;
-    }
   };
 
   if (isLoading) {
@@ -53,8 +42,6 @@ const BadgesVigik = () => {
     );
   }
 
-  const available = stock?.available_count ?? 0;
-  const nextDateText = formatDate(stock?.next_reception_date);
   const priceNumber = stock?.price != null ? parseFloat(stock.price) : null;
   const priceText =
     priceNumber != null && !Number.isNaN(priceNumber)
@@ -69,49 +56,32 @@ const BadgesVigik = () => {
             Badges Vigik
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Consultez la disponibilité des badges Vigik et la date de la prochaine réception.
+            Consultez les informations sur les badges Vigik.
           </p>
         </div>
 
         <div className="max-w-xl mx-auto animate-slide-up">
           <Card className="border-border">
             <CardContent className="p-6 sm:p-8">
-              {priceText ? (
-                <div className="mb-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-blue-800 dark:text-blue-300">
-                    Le tarif d'un badge est : <span className="font-medium">{priceText}</span>
-                  </p>
-                </div>
-              ) : (
-                <p className="mb-6 text-sm text-muted-foreground">Tarif non défini pour le moment.</p>
-              )}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                   <KeyRound className="h-8 w-8" />
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Badges disponibles</p>
-                  <p className="text-3xl font-bold text-foreground">{available}</p>
+                  <h2 className="text-xl font-semibold text-foreground">Informations</h2>
+                  {priceText && (
+                    <p className="text-muted-foreground">
+                      Tarif : <span className="font-medium text-foreground">{priceText}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {available <= 0 && (
-                <div className="mt-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                  <div className="flex items-center gap-3 text-yellow-800 dark:text-yellow-300">
-                    <Calendar className="h-5 w-5" />
-                    <p>
-                      Rupture de stock. {nextDateText ? (
-                        <>
-                          Prochaine réception prévue le <span className="font-medium">{nextDateText}</span>.
-                        </>
-                      ) : (
-                        <>Date de prochaine réception à venir.</>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              )}
-
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <p className="text-foreground whitespace-pre-wrap">
+                  {stock?.info_text || "Aucune information disponible pour le moment."}
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
