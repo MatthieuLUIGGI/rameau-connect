@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "@/components/NotificationBell";
@@ -25,6 +25,7 @@ const Navigation = () => {
     { path: "/syndic", label: "Syndic", icon: Users },
     { path: "/actualites", label: "Actualités", icon: Newspaper },
     { path: "/ag", label: "AG", icon: BarChart3 },
+    { path: "/conseil-syndical", label: "Conseil Syndical", icon: Shield },
     { path: "/sondages", label: "Consultations", icon: BarChart3 },
     { path: "/contact", label: "Contactez-nous", icon: Mail },
   ];
@@ -89,6 +90,9 @@ const Navigation = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/admin/ag">Gérer les AG</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/conseil-syndical">Gérer le Conseil Syndical</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/admin/actualites">Gérer les actualités</Link>
@@ -190,6 +194,13 @@ const Navigation = () => {
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
                       >
                         <span className="font-medium">Gérer les AG</span>
+                      </Link>
+                      <Link
+                        to="/admin/conseil-syndical"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">Gérer le Conseil Syndical</span>
                       </Link>
                       <Link
                         to="/admin/actualites"
