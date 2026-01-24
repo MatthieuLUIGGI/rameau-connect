@@ -62,13 +62,14 @@ const ConseilSyndical = () => {
     setIsVerifying(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('verify-conseil-password', {
-        body: { password, action: 'verify' }
+      // Use RPC function instead of Edge Function
+      const { data, error } = await supabase.rpc('verify_conseil_password', {
+        input_password: password
       });
 
       if (error) throw error;
 
-      if (data.valid) {
+      if (data === true) {
         setIsUnlocked(true);
         sessionStorage.setItem('conseil_syndical_unlocked', 'true');
         toast({ title: 'Accès autorisé', description: 'Bienvenue dans l\'espace Conseil Syndical' });
