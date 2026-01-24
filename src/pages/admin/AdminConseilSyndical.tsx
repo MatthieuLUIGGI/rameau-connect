@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { FileText, Plus, Pencil, Trash2, Download, Calendar, Key, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -199,18 +199,19 @@ const AdminConseilSyndical = () => {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('verify-conseil-password', {
-        body: { action: 'set', newPassword: values.newPassword }
+      // Use RPC function instead of Edge Function
+      const { data, error } = await supabase.rpc('set_conseil_password', {
+        new_password: values.newPassword
       });
 
       if (error) throw error;
 
-      if (data.success) {
+      if (data === true) {
         toast({ title: 'Succès', description: 'Mot de passe défini avec succès' });
         passwordForm.reset();
         setIsPasswordDialogOpen(false);
       } else {
-        throw new Error(data.error || 'Erreur lors de la définition du mot de passe');
+        throw new Error('Erreur lors de la définition du mot de passe');
       }
     } catch (error: any) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -247,11 +248,14 @@ const AdminConseilSyndical = () => {
                 Ajouter un compte rendu
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent aria-describedby="dialog-compte-rendu-description">
               <DialogHeader>
                 <DialogTitle>
                   {editingId ? 'Modifier le compte rendu' : 'Ajouter un compte rendu'}
                 </DialogTitle>
+                <DialogDescription id="dialog-compte-rendu-description">
+                  {editingId ? 'Modifiez les informations du compte rendu.' : 'Ajoutez un nouveau compte rendu du conseil syndical.'}
+                </DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -311,9 +315,12 @@ const AdminConseilSyndical = () => {
                 Définir le mot de passe
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent aria-describedby="dialog-password-description">
               <DialogHeader>
                 <DialogTitle>Définir le mot de passe d'accès</DialogTitle>
+                <DialogDescription id="dialog-password-description">
+                  Ce mot de passe sera requis pour accéder aux documents du conseil syndical.
+                </DialogDescription>
               </DialogHeader>
               <Form {...passwordForm}>
                 <form onSubmit={passwordForm.handleSubmit(handlePasswordChange)} className="space-y-4">

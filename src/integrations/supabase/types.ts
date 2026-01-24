@@ -426,6 +426,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_conseil_password: { Args: { new_password: string }; Returns: boolean }
+      verify_conseil_password: {
+        Args: { input_password: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "user" | "ag"
