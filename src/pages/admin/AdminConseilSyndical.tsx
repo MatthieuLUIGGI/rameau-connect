@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { FileText, Plus, Pencil, Trash2, Download, Calendar, Key, Eye, EyeOff } from "lucide-react";
+import { FileText, Plus, Pencil, Trash2, ExternalLink, Calendar, Key, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -468,7 +468,7 @@ const AdminConseilSyndical = () => {
                       className="flex-1"
                     >
                       <Button className="w-full" variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-1" />
+                        <ExternalLink className="h-4 w-4 mr-1" />
                         Voir
                       </Button>
                     </a>
