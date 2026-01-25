@@ -36,11 +36,20 @@ const quillModules = {
   toolbar: [
     [{ 'header': [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
     ['link', 'image'],
     ['clean']
   ]
 };
+
+const quillFormats = [
+  'header',
+  'bold', 'italic', 'underline', 'strike',
+  'color', 'background',
+  'list', 'bullet',
+  'link', 'image'
+];
 
 const AdminActualites = () => {
   const [actualites, setActualites] = useState<Actualite[]>([]);
@@ -584,6 +593,7 @@ const AdminActualites = () => {
                     value={formData.content}
                     onChange={(content) => setFormData({ ...formData, content })}
                     modules={quillModules}
+                    formats={quillFormats}
                     className="min-h-[300px]"
                   />
                 </div>
