@@ -83,11 +83,45 @@ const AdminConseilSyndical = () => {
     setIsLoading(false);
   };
 
+  // Types de fichiers acceptés
+  const acceptedFileTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'application/rtf',
+  ];
+
+  const acceptedExtensions = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf';
+
+  const getFileTypeLabel = (mimeType: string): string => {
+    const typeLabels: Record<string, string> = {
+      'application/pdf': 'PDF',
+      'application/msword': 'Word',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
+      'application/vnd.ms-excel': 'Excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel',
+      'application/vnd.ms-powerpoint': 'PowerPoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PowerPoint',
+      'text/plain': 'Texte',
+      'application/rtf': 'RTF',
+    };
+    return typeLabels[mimeType] || 'Document';
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') {
-        toast({ title: 'Erreur', description: 'Seuls les fichiers PDF sont acceptés', variant: 'destructive' });
+      if (!acceptedFileTypes.includes(selectedFile.type)) {
+        toast({ 
+          title: 'Erreur', 
+          description: 'Types de fichiers acceptés : PDF, Word, Excel, PowerPoint, Texte', 
+          variant: 'destructive' 
+        });
         return;
       }
       if (selectedFile.size > 10 * 1024 * 1024) {
@@ -118,7 +152,7 @@ const AdminConseilSyndical = () => {
 
   const handleSubmit = async (values: z.infer<typeof compteRenduSchema>) => {
     if (!editingId && !file) {
-      toast({ title: 'Erreur', description: 'Veuillez sélectionner un fichier PDF', variant: 'destructive' });
+      toast({ title: 'Erreur', description: 'Veuillez sélectionner un fichier', variant: 'destructive' });
       return;
     }
 
@@ -286,14 +320,17 @@ const AdminConseilSyndical = () => {
                     )}
                   />
                   <div>
-                    <Label htmlFor="file">Fichier PDF {editingId && '(optionnel)'}</Label>
+                    <Label htmlFor="file">Fichier {editingId && '(optionnel)'}</Label>
                     <Input
                       id="file"
                       type="file"
-                      accept=".pdf"
+                      accept={acceptedExtensions}
                       onChange={handleFileChange}
                       className="mt-1"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formats acceptés : PDF, Word, Excel, PowerPoint, Texte
+                    </p>
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={resetForm}>
