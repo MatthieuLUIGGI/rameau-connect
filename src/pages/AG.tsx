@@ -70,54 +70,65 @@ const AG = () => {
           </div>
         </div>
 
-        {comptesRendus.length === 0 ? (
-          <div className="text-center text-muted-foreground">
-            Aucun compte rendu disponible pour le moment.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {comptesRendus.map((cr, index) => (
-              <Card 
-                key={cr.id} 
-                className="hover-lift border-border"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold mb-1 text-foreground line-clamp-2">
-                        {cr.title}
-                      </h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(cr.date).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {Array.from({ length: 6 }).map((_, index) => {
+            const cr = comptesRendus[index];
+            
+            if (cr) {
+              return (
+                <Card 
+                  key={cr.id} 
+                  className="hover-lift border-border"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold mb-1 text-foreground line-clamp-2">
+                          {cr.title}
+                        </h3>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(cr.date).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <a 
-                    href={cr.file_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button className="w-full" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Télécharger le PDF
-                    </Button>
-                  </a>
+                    
+                    <a 
+                      href={cr.file_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Button className="w-full" variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Télécharger le PDF
+                      </Button>
+                    </a>
+                  </CardContent>
+                </Card>
+              );
+            }
+            
+            return (
+              <Card 
+                key={`empty-${index}`} 
+                className="border-dashed border-2 border-muted-foreground/20"
+              >
+                <CardContent className="p-6 flex items-center justify-center min-h-[180px]">
+                  <span className="text-muted-foreground/50 text-sm">Emplacement libre</span>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

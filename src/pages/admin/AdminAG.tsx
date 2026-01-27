@@ -227,118 +227,140 @@ const AdminAG = () => {
     setIsOpen(true);
   };
 
+  const canAddMore = comptesRendus.length < 6;
+
   return (
     <div className="container mx-auto px-4 py-24">
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8">
         <h1 className="text-4xl font-bold">Gestion des Comptes Rendus AG</h1>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setIsOpen(true); }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un compte rendu
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingCR ? 'Modifier' : 'Ajouter'} un compte rendu</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titre *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Ex: Assemblée Générale Ordinaire 2024"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="date">Date de l'AG *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="file">
-                  Fichier PDF {!editingCR && '*'}
-                  {editingCR && ' (laisser vide pour conserver le fichier actuel)'}
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="file"
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
-                    className="cursor-pointer"
-                  />
-                  {file && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Upload className="h-4 w-4" />
-                      {file.name}
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Format PDF uniquement, taille maximale 10 MB
-                </p>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={resetForm} disabled={isUploading}>
-                  Annuler
-                </Button>
-                <Button type="submit" disabled={isUploading}>
-                  {isUploading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {editingCR ? 'Modifier' : 'Ajouter'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <p className="text-muted-foreground mt-2">
+          {comptesRendus.length}/6 emplacements utilisés
+        </p>
       </div>
 
-      <div className="grid gap-4">
-        {comptesRendus.map((cr) => (
-          <Card key={cr.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{cr.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(cr.date).toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="icon" variant="ghost" onClick={() => openEditDialog(cr)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" onClick={() => handleDelete(cr.id, cr.file_url)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+          {Array.from({ length: 6 }).map((_, index) => {
+            const cr = comptesRendus[index];
+            
+            if (cr) {
+              return (
+                <Card key={cr.id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <CardTitle className="text-lg line-clamp-2">{cr.title}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {new Date(cr.date).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => openEditDialog(cr)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => handleDelete(cr.id, cr.file_url)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <a 
+                      href={cr.file_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      📄 Voir le PDF
+                    </a>
+                  </CardContent>
+                </Card>
+              );
+            }
+            
+            return (
+              <DialogTrigger asChild key={`empty-${index}`}>
+                <Card 
+                  className="border-dashed border-2 border-muted-foreground/30 hover:border-primary/50 cursor-pointer transition-colors"
+                  onClick={() => { resetForm(); setIsOpen(true); }}
+                >
+                  <CardContent className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-2">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <Plus className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">Ajouter un compte rendu</span>
+                  </CardContent>
+                </Card>
+              </DialogTrigger>
+            );
+          })}
+        </div>
+
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingCR ? 'Modifier' : 'Ajouter'} un compte rendu</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Titre *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Ex: Assemblée Générale Ordinaire 2024"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Date de l'AG *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="file">
+                Fichier PDF {!editingCR && '*'}
+                {editingCR && ' (laisser vide pour conserver le fichier actuel)'}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="file"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                />
+                {file && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Upload className="h-4 w-4" />
+                    {file.name}
+                  </div>
+                )}
               </div>
-            </CardHeader>
-            <CardContent>
-              <a 
-                href={cr.file_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                📄 Voir le PDF
-              </a>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <p className="text-xs text-muted-foreground">
+                Format PDF uniquement, taille maximale 10 MB
+              </p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={resetForm} disabled={isUploading}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={isUploading}>
+                {isUploading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {editingCR ? 'Modifier' : 'Ajouter'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
