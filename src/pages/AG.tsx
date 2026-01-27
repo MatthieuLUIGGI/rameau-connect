@@ -29,7 +29,7 @@ const AG = () => {
     const { data, error } = await supabase
       .from('comptes_rendus_ag')
       .select('*')
-      .order('date', { ascending: false });
+      .order('order_index', { ascending: true });
     
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });

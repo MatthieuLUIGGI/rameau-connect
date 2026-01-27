@@ -3,11 +3,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, Plus } from 'lucide-react';
 import { z } from 'zod';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableAGCard } from '@/components/admin/SortableAGCard';
+import { EmptyAGSlot } from '@/components/admin/EmptyAGSlot';
 
 interface CompteRendu {
   id: string;
@@ -15,6 +32,7 @@ interface CompteRendu {
   file_url: string;
   date: string;
   created_at: string;
+  order_index: number;
 }
 
 const compteRenduSchema = z.object({
@@ -34,6 +52,13 @@ const AdminAG = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   useEffect(() => {
     fetchComptesRendus();
   }, []);
@@ -42,12 +67,39 @@ const AdminAG = () => {
     const { data, error } = await supabase
       .from('comptes_rendus_ag')
       .select('*')
-      .order('date', { ascending: false });
+      .order('order_index', { ascending: true });
     
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
       setComptesRendus(data || []);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = comptesRendus.findIndex((item) => item.id === active.id);
+      const newIndex = comptesRendus.findIndex((item) => item.id === over.id);
+
+      const newOrder = arrayMove(comptesRendus, oldIndex, newIndex);
+      setComptesRendus(newOrder);
+
+      // Update order_index in database for all items
+      const updates = newOrder.map((cr, index) => ({
+        id: cr.id,
+        order_index: index,
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('comptes_rendus_ag')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
+      }
+
+      toast({ title: 'Succès', description: 'Ordre mis à jour' });
     }
   };
 
@@ -62,7 +114,7 @@ const AdminAG = () => {
         });
         return;
       }
-      if (selectedFile.size > 10 * 1024 * 1024) { // 10MB limit
+      if (selectedFile.size > 10 * 1024 * 1024) {
         toast({ 
           title: 'Erreur', 
           description: 'Le fichier ne doit pas dépasser 10 MB', 
@@ -99,7 +151,6 @@ const AdminAG = () => {
     e.preventDefault();
     setIsUploading(true);
     
-    // Validate input
     const validation = compteRenduSchema.safeParse(formData);
     if (!validation.success) {
       const errors = validation.error.errors.map(e => e.message).join(', ');
@@ -120,7 +171,6 @@ const AdminAG = () => {
     
     let fileUrl = editingCR?.file_url || '';
 
-    // Upload new file if provided
     if (file) {
       const uploadedUrl = await uploadFile(file);
       if (!uploadedUrl) {
@@ -144,16 +194,18 @@ const AdminAG = () => {
         resetForm();
       }
     } else {
+      // Get the next order_index
+      const nextOrderIndex = comptesRendus.length;
+      
       const { data: newCompteRendu, error } = await supabase
         .from('comptes_rendus_ag')
-        .insert([{ ...formData, file_url: fileUrl }])
+        .insert([{ ...formData, file_url: fileUrl, order_index: nextOrderIndex }])
         .select()
         .single();
       
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else if (newCompteRendu) {
-        // Créer une notification pour tous les utilisateurs
         const { data: usersData } = await supabase
           .from('profiles')
           .select('id');
@@ -180,16 +232,13 @@ const AdminAG = () => {
   const handleDelete = async (id: string, fileUrl: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte rendu ?')) return;
     
-    // Extract file path from URL
     const urlParts = fileUrl.split('/');
     const fileName = urlParts[urlParts.length - 1];
 
-    // Delete file from storage
     await supabase.storage
       .from('ag-reports')
       .remove([fileName]);
 
-    // Delete database record
     const { error } = await supabase
       .from('comptes_rendus_ag')
       .delete()
@@ -198,7 +247,6 @@ const AdminAG = () => {
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
-      // Supprimer les notifications liées
       await supabase
         .from('notifications')
         .delete()
@@ -227,78 +275,66 @@ const AdminAG = () => {
     setIsOpen(true);
   };
 
-  const canAddMore = comptesRendus.length < 6;
+  const openAddDialog = () => {
+    resetForm();
+    setIsOpen(true);
+  };
+
+  // Create array of 6 slots, filling with reports where they exist
+  const slots = Array.from({ length: 6 }).map((_, index) => {
+    return comptesRendus[index] || null;
+  });
 
   return (
     <div className="container mx-auto px-4 py-24">
       <div className="mb-8">
         <h1 className="text-4xl font-bold">Gestion des Comptes Rendus AG</h1>
         <p className="text-muted-foreground mt-2">
-          {comptesRendus.length}/6 emplacements utilisés
+          {comptesRendus.length}/6 emplacements utilisés - Glissez-déposez pour réorganiser
         </p>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-          {Array.from({ length: 6 }).map((_, index) => {
-            const cr = comptesRendus[index];
-            
-            if (cr) {
-              return (
-                <Card key={cr.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 min-w-0 pr-4">
-                        <CardTitle className="text-lg line-clamp-2">{cr.title}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {new Date(cr.date).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                        </p>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={comptesRendus.map(cr => cr.id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+              {slots.map((cr, index) => {
+                if (cr) {
+                  return (
+                    <SortableAGCard
+                      key={cr.id}
+                      cr={cr}
+                      onEdit={openEditDialog}
+                      onDelete={handleDelete}
+                    />
+                  );
+                }
+                
+                return (
+                  <Card 
+                    key={`empty-${index}`}
+                    className="border-dashed border-2 border-muted-foreground/30 hover:border-primary/50 cursor-pointer transition-colors"
+                    onClick={openAddDialog}
+                  >
+                    <CardContent className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-2">
+                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                        <Plus className="h-6 w-6 text-muted-foreground" />
                       </div>
-                      <div className="flex gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => openEditDialog(cr)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={() => handleDelete(cr.id, cr.file_url)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <a 
-                      href={cr.file_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      📄 Voir le PDF
-                    </a>
-                  </CardContent>
-                </Card>
-              );
-            }
-            
-            return (
-              <DialogTrigger asChild key={`empty-${index}`}>
-                <Card 
-                  className="border-dashed border-2 border-muted-foreground/30 hover:border-primary/50 cursor-pointer transition-colors"
-                  onClick={() => { resetForm(); setIsOpen(true); }}
-                >
-                  <CardContent className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-2">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                      <Plus className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <span className="text-sm text-muted-foreground">Ajouter un compte rendu</span>
-                  </CardContent>
-                </Card>
-              </DialogTrigger>
-            );
-          })}
-        </div>
+                      <span className="text-sm text-muted-foreground">Ajouter un compte rendu</span>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
 
         <DialogContent className="max-w-2xl">
           <DialogHeader>
