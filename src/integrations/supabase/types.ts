@@ -120,6 +120,7 @@ export type Database = {
           date: string
           file_url: string
           id: string
+          order_index: number | null
           title: string
           updated_at: string | null
         }
@@ -129,6 +130,7 @@ export type Database = {
           date: string
           file_url: string
           id?: string
+          order_index?: number | null
           title: string
           updated_at?: string | null
         }
@@ -138,6 +140,7 @@ export type Database = {
           date?: string
           file_url?: string
           id?: string
+          order_index?: number | null
           title?: string
           updated_at?: string | null
         }
