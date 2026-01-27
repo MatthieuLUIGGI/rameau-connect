@@ -112,11 +112,11 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[{
-            icon: KeyRound,
-            title: "Badges Vigik",
-            description: "Consultez le stock disponible et les réceptions prévues",
-            href: "/badges-vigik",
-            color: "from-blue-500/10 to-cyan-500/10"
+            icon: Newspaper,
+            title: "Actualités",
+            description: "Restez informé des dernières nouvelles de la copropriété",
+            href: "/actualites",
+            color: "from-orange-500/10 to-red-500/10"
           }, {
             icon: Users,
             title: "Conseil Syndical",
@@ -124,11 +124,11 @@ const Home = () => {
             href: "/syndic",
             color: "from-purple-500/10 to-pink-500/10"
           }, {
-            icon: Newspaper,
-            title: "Actualités",
-            description: "Restez informé des dernières nouvelles de la copropriété",
-            href: "/actualites",
-            color: "from-orange-500/10 to-red-500/10"
+            icon: KeyRound,
+            title: "Badges Vigik",
+            description: "",
+            href: "/badges-vigik",
+            color: "from-blue-500/10 to-cyan-500/10"
           }, {
             icon: FileText,
             title: "Assemblées Générales",
