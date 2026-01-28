@@ -91,8 +91,11 @@ const ConseilSyndical = () => {
     }
   };
 
-  // Create array of 6 slots, filling with reports where they exist
-  const slots = Array.from({ length: 6 }).map((_, index) => {
+  // Calculate grid slots - minimum 6, or match the number of reports (rounded up to even number for 2-column layout)
+  const minSlots = Math.max(6, Math.ceil(comptesRendus.length / 2) * 2);
+  
+  // Create array of slots, filling with reports where they exist
+  const slots = Array.from({ length: minSlots }).map((_, index) => {
     return comptesRendus[index] || null;
   });
 
