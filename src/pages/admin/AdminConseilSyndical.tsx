@@ -60,6 +60,7 @@ const passwordSchema = z.object({
 
 const AdminConseilSyndical = () => {
   const [comptesRendus, setComptesRendus] = useState<CompteRendu[]>([]);
+  const [slotCount, setSlotCount] = useState(6);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -111,6 +112,10 @@ const AdminConseilSyndical = () => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
       setComptesRendus(data || []);
+      // Update slot count if we have more reports than current slots
+      if (data && data.length > slotCount) {
+        setSlotCount(data.length);
+      }
     }
     setIsLoading(false);
   };
@@ -336,17 +341,13 @@ const AdminConseilSyndical = () => {
     }
   };
 
-  // Calculate minimum slots needed (at least 6, or current count + 1 for empty slot)
-  const minSlots = Math.max(6, comptesRendus.length + 1);
-  
-  // Create array of slots, filling with reports where they exist
-  const slots = Array.from({ length: minSlots }).map((_, index) => {
+  // Create array of slots based on slotCount
+  const slots = Array.from({ length: slotCount }).map((_, index) => {
     return comptesRendus[index] || null;
   });
 
   const handleAddSlot = () => {
-    // Just open the dialog to add a new report
-    openAddDialog();
+    setSlotCount(prev => prev + 1);
   };
 
   if (isLoading) {
@@ -365,14 +366,14 @@ const AdminConseilSyndical = () => {
             Gestion du Conseil Syndical
           </h1>
           <p className="text-muted-foreground">
-            {comptesRendus.length} compte{comptesRendus.length > 1 ? 's' : ''} rendu{comptesRendus.length > 1 ? 's' : ''} - Glissez-déposez pour réorganiser
+            {comptesRendus.length}/{slotCount} emplacement{slotCount > 1 ? 's' : ''} utilisé{slotCount > 1 ? 's' : ''} - Glissez-déposez pour réorganiser
           </p>
         </div>
 
         <div className="flex flex-wrap gap-4 mb-8">
           <Button onClick={handleAddSlot}>
             <Plus className="h-4 w-4 mr-2" />
-            Ajouter un compte rendu
+            Ajouter un emplacement
           </Button>
           <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
             <Button variant="outline" onClick={() => setIsPasswordDialogOpen(true)}>
@@ -468,14 +469,33 @@ const AdminConseilSyndical = () => {
               strategy={rectSortingStrategy}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-                {comptesRendus.map((cr) => (
-                  <SortableConseilCard
-                    key={cr.id}
-                    cr={cr}
-                    onEdit={openEditDialog}
-                    onDelete={handleDelete}
-                  />
-                ))}
+                {slots.map((cr, index) => {
+                  if (cr) {
+                    return (
+                      <SortableConseilCard
+                        key={cr.id}
+                        cr={cr}
+                        onEdit={openEditDialog}
+                        onDelete={handleDelete}
+                      />
+                    );
+                  }
+                  
+                  return (
+                    <Card 
+                      key={`empty-${index}`}
+                      className="border-dashed border-2 border-muted-foreground/30 hover:border-primary/50 cursor-pointer transition-colors"
+                      onClick={openAddDialog}
+                    >
+                      <CardContent className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-2">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <Plus className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <span className="text-sm text-muted-foreground">Ajouter un compte rendu</span>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </SortableContext>
           </DndContext>
