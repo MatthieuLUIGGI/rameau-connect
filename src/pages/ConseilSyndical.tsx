@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileText, Calendar, Download, Lock, Eye, EyeOff } from "lucide-react";
+import { FileText, Calendar, Download, Lock, Eye, EyeOff, ExternalLink, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -11,9 +11,11 @@ import { Link } from "react-router-dom";
 interface CompteRendu {
   id: string;
   title: string;
-  file_url: string;
+  file_url: string | null;
+  link_url: string | null;
   date: string;
   created_at: string;
+  order_index: number;
 }
 
 const ConseilSyndical = () => {
@@ -41,7 +43,7 @@ const ConseilSyndical = () => {
     const { data, error } = await supabase
       .from('comptes_rendus_conseil_syndical')
       .select('*')
-      .order('date', { ascending: false });
+      .order('order_index', { ascending: true });
     
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -88,6 +90,11 @@ const ConseilSyndical = () => {
       setIsVerifying(false);
     }
   };
+
+  // Create array of 6 slots, filling with reports where they exist
+  const slots = Array.from({ length: 6 }).map((_, index) => {
+    return comptesRendus[index] || null;
+  });
 
   if (isLoading) {
     return (
@@ -177,54 +184,80 @@ const ConseilSyndical = () => {
           </div>
         </div>
 
-        {comptesRendus.length === 0 ? (
-          <div className="text-center text-muted-foreground">
-            Aucun compte rendu disponible pour le moment.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {comptesRendus.map((cr, index) => (
-              <Card 
-                key={cr.id} 
-                className="hover-lift border-border"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold mb-1 text-foreground line-clamp-2">
-                        {cr.title}
-                      </h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(cr.date).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+          {slots.map((cr, index) => {
+            if (cr) {
+              const isLink = !!cr.link_url;
+              const displayUrl = cr.link_url || cr.file_url;
+
+              return (
+                <Card 
+                  key={cr.id} 
+                  className="hover-lift border-border"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        {isLink ? (
+                          <LinkIcon className="h-6 w-6 text-primary" />
+                        ) : (
+                          <FileText className="h-6 w-6 text-primary" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold mb-1 text-foreground line-clamp-2">
+                          {cr.title}
+                        </h3>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>{new Date(cr.date).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <a 
-                    href={cr.file_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button className="w-full" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Télécharger le PDF
-                    </Button>
-                  </a>
+                    
+                    <a 
+                      href={displayUrl || '#'} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Button className="w-full" variant="outline">
+                        {isLink ? (
+                          <>
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Ouvrir le lien
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-2" />
+                            Télécharger le document
+                          </>
+                        )}
+                      </Button>
+                    </a>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            // Empty slot
+            return (
+              <Card 
+                key={`empty-${index}`}
+                className="border-dashed border-2 border-muted-foreground/20"
+              >
+                <CardContent className="p-6 flex items-center justify-center min-h-[160px]">
+                  <span className="text-muted-foreground/50">Emplacement libre</span>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

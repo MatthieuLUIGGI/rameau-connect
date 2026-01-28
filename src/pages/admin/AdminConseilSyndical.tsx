@@ -1,28 +1,49 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { FileText, Plus, Pencil, Trash2, ExternalLink, Calendar, Key, Eye, EyeOff } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Plus, Key, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableConseilCard } from '@/components/admin/SortableConseilCard';
 
 interface CompteRendu {
   id: string;
   title: string;
-  file_url: string;
+  file_url: string | null;
+  link_url: string | null;
   date: string;
   created_at: string;
+  order_index: number;
 }
 
 const compteRenduSchema = z.object({
-  title: z.string().min(1, "Le titre est requis"),
+  title: z.string().min(1, "Le titre est requis").max(200, "Le titre ne peut pas dépasser 200 caractères"),
   date: z.string().min(1, "La date est requise"),
+  type: z.enum(["file", "link"]),
+  link_url: z.string().optional(),
 });
 
 const passwordSchema = z.object({
@@ -42,20 +63,31 @@ const AdminConseilSyndical = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingCR, setEditingCR] = useState<CompteRendu | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const form = useForm({
     resolver: zodResolver(compteRenduSchema),
     defaultValues: {
       title: "",
       date: "",
+      type: "file" as "file" | "link",
+      link_url: "",
     },
   });
+
+  const selectedType = form.watch("type");
 
   const passwordForm = useForm({
     resolver: zodResolver(passwordSchema),
@@ -73,7 +105,7 @@ const AdminConseilSyndical = () => {
     const { data, error } = await supabase
       .from('comptes_rendus_conseil_syndical')
       .select('*')
-      .order('date', { ascending: false });
+      .order('order_index', { ascending: true });
     
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -81,6 +113,33 @@ const AdminConseilSyndical = () => {
       setComptesRendus(data || []);
     }
     setIsLoading(false);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = comptesRendus.findIndex((item) => item.id === active.id);
+      const newIndex = comptesRendus.findIndex((item) => item.id === over.id);
+
+      const newOrder = arrayMove(comptesRendus, oldIndex, newIndex);
+      setComptesRendus(newOrder);
+
+      // Update order_index in database for all items
+      const updates = newOrder.map((cr, index) => ({
+        id: cr.id,
+        order_index: index,
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('comptes_rendus_conseil_syndical')
+          .update({ order_index: update.order_index })
+          .eq('id', update.id);
+      }
+
+      toast({ title: 'Succès', description: 'Ordre mis à jour' });
+    }
   };
 
   // Types de fichiers acceptés
@@ -97,21 +156,6 @@ const AdminConseilSyndical = () => {
   ];
 
   const acceptedExtensions = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf';
-
-  const getFileTypeLabel = (mimeType: string): string => {
-    const typeLabels: Record<string, string> = {
-      'application/pdf': 'PDF',
-      'application/msword': 'Word',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
-      'application/vnd.ms-excel': 'Excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel',
-      'application/vnd.ms-powerpoint': 'PowerPoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PowerPoint',
-      'text/plain': 'Texte',
-      'application/rtf': 'RTF',
-    };
-    return typeLabels[mimeType] || 'Document';
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -151,39 +195,57 @@ const AdminConseilSyndical = () => {
   };
 
   const handleSubmit = async (values: z.infer<typeof compteRenduSchema>) => {
-    if (!editingId && !file) {
+    // Validate based on type
+    if (values.type === "file" && !editingCR && !file) {
       toast({ title: 'Erreur', description: 'Veuillez sélectionner un fichier', variant: 'destructive' });
+      return;
+    }
+
+    if (values.type === "link" && !values.link_url?.trim()) {
+      toast({ title: 'Erreur', description: 'Veuillez entrer une URL', variant: 'destructive' });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      let fileUrl = editingId ? comptesRendus.find(cr => cr.id === editingId)?.file_url : '';
+      let fileUrl: string | null = editingCR?.file_url || null;
+      let linkUrl: string | null = editingCR?.link_url || null;
 
-      if (file) {
-        fileUrl = await uploadFile(file);
+      if (values.type === "file") {
+        if (file) {
+          fileUrl = await uploadFile(file);
+        }
+        linkUrl = null;
+      } else {
+        fileUrl = null;
+        linkUrl = values.link_url || null;
       }
 
-      if (editingId) {
+      if (editingCR) {
         const { error } = await supabase
           .from('comptes_rendus_conseil_syndical')
           .update({
             title: values.title,
             date: values.date,
             file_url: fileUrl,
+            link_url: linkUrl,
           })
-          .eq('id', editingId);
+          .eq('id', editingCR.id);
 
         if (error) throw error;
         toast({ title: 'Succès', description: 'Compte rendu modifié avec succès' });
       } else {
+        const nextOrderIndex = comptesRendus.length;
+        
         const { error } = await supabase
           .from('comptes_rendus_conseil_syndical')
           .insert({
             title: values.title,
             date: values.date,
             file_url: fileUrl,
+            link_url: linkUrl,
+            order_index: nextOrderIndex,
           });
 
         if (error) throw error;
@@ -199,8 +261,17 @@ const AdminConseilSyndical = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, fileUrl: string | null) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte rendu ?')) return;
+
+    // Delete file from storage if exists
+    if (fileUrl) {
+      const urlParts = fileUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      await supabase.storage
+        .from('conseil-syndical-reports')
+        .remove([fileName]);
+    }
 
     const { error } = await supabase
       .from('comptes_rendus_conseil_syndical')
@@ -216,16 +287,28 @@ const AdminConseilSyndical = () => {
   };
 
   const resetForm = () => {
-    form.reset();
+    form.reset({
+      title: "",
+      date: "",
+      type: "file",
+      link_url: "",
+    });
     setFile(null);
-    setEditingId(null);
+    setEditingCR(null);
     setIsDialogOpen(false);
   };
 
   const openEditDialog = (cr: CompteRendu) => {
-    setEditingId(cr.id);
+    setEditingCR(cr);
     form.setValue('title', cr.title);
     form.setValue('date', cr.date);
+    form.setValue('type', cr.link_url ? 'link' : 'file');
+    form.setValue('link_url', cr.link_url || '');
+    setIsDialogOpen(true);
+  };
+
+  const openAddDialog = () => {
+    resetForm();
     setIsDialogOpen(true);
   };
 
@@ -233,7 +316,6 @@ const AdminConseilSyndical = () => {
     setIsSubmitting(true);
 
     try {
-      // Use RPC function instead of Edge Function
       const { data, error } = await supabase.rpc('set_conseil_password', {
         new_password: values.newPassword
       });
@@ -254,6 +336,11 @@ const AdminConseilSyndical = () => {
     }
   };
 
+  // Create array of 6 slots, filling with reports where they exist
+  const slots = Array.from({ length: 6 }).map((_, index) => {
+    return comptesRendus[index] || null;
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen pt-24 flex items-center justify-center">
@@ -270,88 +357,16 @@ const AdminConseilSyndical = () => {
             Gestion du Conseil Syndical
           </h1>
           <p className="text-muted-foreground">
-            Gérez les comptes rendus et le mot de passe d'accès
+            {comptesRendus.length}/6 emplacements utilisés - Glissez-déposez pour réorganiser
           </p>
         </div>
 
         <div className="flex flex-wrap gap-4 mb-8">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter un compte rendu
-              </Button>
-            </DialogTrigger>
-            <DialogContent aria-describedby="dialog-compte-rendu-description">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingId ? 'Modifier le compte rendu' : 'Ajouter un compte rendu'}
-                </DialogTitle>
-                <DialogDescription id="dialog-compte-rendu-description">
-                  {editingId ? 'Modifiez les informations du compte rendu.' : 'Ajoutez un nouveau compte rendu du conseil syndical.'}
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Titre</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Titre du compte rendu" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div>
-                    <Label htmlFor="file">Fichier {editingId && '(optionnel)'}</Label>
-                    <Input
-                      id="file"
-                      type="file"
-                      accept={acceptedExtensions}
-                      onChange={handleFileChange}
-                      className="mt-1"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Formats acceptés : PDF, Word, Excel, PowerPoint, Texte
-                    </p>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={resetForm}>
-                      Annuler
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Enregistrement...' : editingId ? 'Modifier' : 'Ajouter'}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-
           <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Key className="h-4 w-4 mr-2" />
-                Définir le mot de passe
-              </Button>
-            </DialogTrigger>
+            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(true)}>
+              <Key className="h-4 w-4 mr-2" />
+              Définir le mot de passe
+            </Button>
             <DialogContent aria-describedby="dialog-password-description">
               <DialogHeader>
                 <DialogTitle>Définir le mot de passe d'accès</DialogTitle>
@@ -430,60 +445,164 @@ const AdminConseilSyndical = () => {
           </Dialog>
         </div>
 
-        {comptesRendus.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              Aucun compte rendu pour le moment.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {comptesRendus.map((cr) => (
-              <Card key={cr.id} className="border-border">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold mb-1 text-foreground line-clamp-2">
-                        {cr.title}
-                      </h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(cr.date).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}</span>
-                      </div>
-                    </div>
-                  </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={comptesRendus.map(cr => cr.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+                {slots.map((cr, index) => {
+                  if (cr) {
+                    return (
+                      <SortableConseilCard
+                        key={cr.id}
+                        cr={cr}
+                        onEdit={openEditDialog}
+                        onDelete={handleDelete}
+                      />
+                    );
+                  }
                   
-                  <div className="flex gap-2">
-                    <a 
-                      href={cr.file_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex-1"
+                  return (
+                    <Card 
+                      key={`empty-${index}`}
+                      className="border-dashed border-2 border-muted-foreground/30 hover:border-primary/50 cursor-pointer transition-colors"
+                      onClick={openAddDialog}
                     >
-                      <Button className="w-full" variant="outline" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Voir
-                      </Button>
-                    </a>
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(cr)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(cr.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <CardContent className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-2">
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                          <Plus className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <span className="text-sm text-muted-foreground">Ajouter un compte rendu</span>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+
+          <DialogContent className="max-w-2xl" aria-describedby="dialog-compte-rendu-description">
+            <DialogHeader>
+              <DialogTitle>
+                {editingCR ? 'Modifier le compte rendu' : 'Ajouter un compte rendu'}
+              </DialogTitle>
+              <DialogDescription id="dialog-compte-rendu-description">
+                {editingCR ? 'Modifiez les informations du compte rendu.' : 'Ajoutez un nouveau compte rendu du conseil syndical.'}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Titre *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Titre du compte rendu" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type de contenu</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                          className="flex gap-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="file" id="type-file" />
+                            <Label htmlFor="type-file">Fichier</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="link" id="type-link" />
+                            <Label htmlFor="type-link">Lien</Label>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {selectedType === "file" && (
+                  <div>
+                    <Label htmlFor="file">Fichier {editingCR && '(optionnel)'}</Label>
+                    <Input
+                      id="file"
+                      type="file"
+                      accept={acceptedExtensions}
+                      onChange={handleFileChange}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formats acceptés : PDF, Word, Excel, PowerPoint, Texte (max 10 Mo)
+                    </p>
+                    {file && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Fichier sélectionné : {file.name}
+                      </p>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                )}
+
+                {selectedType === "link" && (
+                  <FormField
+                    control={form.control}
+                    name="link_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL du lien *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={resetForm} disabled={isSubmitting}>
+                    Annuler
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {editingCR ? 'Modifier' : 'Ajouter'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
