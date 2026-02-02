@@ -94,6 +94,22 @@ const AdminSondages = () => {
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
+        // Créer une notification pour tous les utilisateurs lors de la modification
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('id');
+        
+        if (usersData) {
+          const notifications = usersData.map(profile => ({
+            user_id: profile.id,
+            type: 'sondage' as const,
+            reference_id: editingSondage.id,
+            title: `Sondage modifié : ${formData.question}`
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+        
         toast({ title: 'Succès', description: 'Sondage modifié avec succès' });
         fetchSondages();
         resetForm();
