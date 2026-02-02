@@ -122,7 +122,8 @@ const AdminActualites = () => {
           ...rest, 
           file_url: newFileUrl, 
           priority,
-          expires_at: expires_at ? new Date(expires_at).toISOString() : null
+          expires_at: expires_at ? new Date(expires_at).toISOString() : null,
+          published_at: new Date().toISOString()
         })
         .eq('id', editingActualite.id);
       

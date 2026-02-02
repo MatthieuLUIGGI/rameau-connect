@@ -15,10 +15,10 @@ const NotificationBell = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
 
-  const getNotificationLink = (type: string) => {
+  const getNotificationLink = (type: string, referenceId: string) => {
     switch (type) {
       case 'actualite':
-        return '/actualites';
+        return `/actualites/${referenceId}`;
       case 'compte_rendu':
         return '/ag';
       case 'sondage':
@@ -30,7 +30,7 @@ const NotificationBell = () => {
 
   const handleNotificationClick = (notification: any) => {
     markAsRead(notification.id);
-    navigate(getNotificationLink(notification.type));
+    navigate(getNotificationLink(notification.type, notification.reference_id));
   };
 
   return (
