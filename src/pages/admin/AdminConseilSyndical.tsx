@@ -239,6 +239,23 @@ const AdminConseilSyndical = () => {
           .eq('id', editingCR.id);
 
         if (error) throw error;
+        
+        // Créer une notification pour tous les utilisateurs lors de la modification
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('id');
+        
+        if (usersData) {
+          const notifications = usersData.map(profile => ({
+            user_id: profile.id,
+            type: 'compte_rendu' as const,
+            reference_id: editingCR.id,
+            title: `Compte rendu CS modifié : ${values.title}`
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+        
         toast({ title: 'Succès', description: 'Compte rendu modifié avec succès' });
       } else {
         const nextOrderIndex = comptesRendus.length;

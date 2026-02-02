@@ -133,6 +133,23 @@ const AdminActualites = () => {
         if (file && previousFileUrl && previousFileUrl !== newFileUrl) {
           await deleteFileFromUrl(previousFileUrl);
         }
+        
+        // Créer une notification pour tous les utilisateurs lors de la modification
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('id');
+        
+        if (usersData) {
+          const notifications = usersData.map(profile => ({
+            user_id: profile.id,
+            type: 'actualite' as const,
+            reference_id: editingActualite.id,
+            title: `Actualité modifiée : ${rest.title}`
+          }));
+          
+          await supabase.from('notifications').insert(notifications);
+        }
+        
         toast({ title: 'Succès', description: 'Actualité modifiée avec succès' });
         fetchActualites();
         resetForm();
