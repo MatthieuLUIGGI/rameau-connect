@@ -74,10 +74,10 @@ const Auth = () => {
         }
 
         const aptNum = parseInt(apartmentNumber);
-        if (isNaN(aptNum) || aptNum < 1 || aptNum > 113) {
+        if (isNaN(aptNum) || aptNum < 0 || aptNum > 113) {
           toast({
             title: 'Erreur',
-            description: 'Le numéro d\'appartement doit être entre 1 et 113',
+            description: 'Le numéro d\'appartement doit être entre 0 et 113',
             variant: 'destructive'
           });
           setIsLoading(false);
@@ -191,15 +191,15 @@ const Auth = () => {
                   <Input
                     id="apartmentNumber"
                     type="number"
-                    min="1"
+                    min="0"
                     max="113"
-                    placeholder="1-113"
+                    placeholder="0-113"
                     value={apartmentNumber}
                     onChange={(e) => setApartmentNumber(e.target.value)}
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Entrez votre numéro d'appartement (1 à 113)
+                    Entrez votre numéro d'appartement (0 à 113)
                   </p>
                 </div>
                 <div className="space-y-2">
