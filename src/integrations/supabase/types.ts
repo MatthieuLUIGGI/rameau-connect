@@ -53,6 +53,27 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_board_config: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       artisans: {
         Row: {
           created_at: string | null
@@ -435,7 +456,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_admin_board_password: {
+        Args: { new_password: string }
+        Returns: boolean
+      }
       set_conseil_password: { Args: { new_password: string }; Returns: boolean }
+      verify_admin_board_password: {
+        Args: { input_password: string }
+        Returns: boolean
+      }
       verify_conseil_password: {
         Args: { input_password: string }
         Returns: boolean

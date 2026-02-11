@@ -81,7 +81,7 @@ const AdminBoard = () => {
     setIsVerifying(true);
 
     try {
-      const { data, error } = await supabase.rpc('verify_conseil_password', {
+      const { data, error } = await supabase.rpc('verify_admin_board_password', {
         input_password: password,
       });
 
