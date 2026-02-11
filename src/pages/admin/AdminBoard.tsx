@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Lock, Eye, EyeOff, Users, Shield } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Lock, Eye, EyeOff, Users, Shield, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -26,6 +27,10 @@ const AdminBoard = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
 
@@ -101,6 +106,28 @@ const AdminBoard = () => {
 
     setIsVerifying(false);
     setPassword("");
+  };
+
+  const handleSetPassword = async () => {
+    if (newPassword.length < 8) {
+      toast({ title: 'Le mot de passe doit contenir au moins 8 caractères', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: 'Les mots de passe ne correspondent pas', variant: 'destructive' });
+      return;
+    }
+    setIsSavingPassword(true);
+    try {
+      const { data, error } = await supabase.rpc('set_admin_board_password', { new_password: newPassword });
+      if (error) throw error;
+      toast({ title: 'Mot de passe défini avec succès' });
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      toast({ title: 'Erreur lors de la définition du mot de passe', variant: 'destructive' });
+    }
+    setIsSavingPassword(false);
   };
 
   if (!isUnlocked) {
@@ -226,6 +253,50 @@ const AdminBoard = () => {
                 )}
               </TableBody>
             </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Separator className="my-8" />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5" />
+            Gérer le mot de passe du tableau de bord
+          </CardTitle>
+          <CardDescription>Définir ou modifier le mot de passe d'accès à cette page (réservé AG)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4 max-w-md">
+            <div className="relative">
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                placeholder="Nouveau mot de passe (min. 8 caractères)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <Input
+              type={showNewPassword ? "text" : "password"}
+              placeholder="Confirmer le mot de passe"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button
+              onClick={handleSetPassword}
+              disabled={isSavingPassword || newPassword.length < 8 || !confirmPassword}
+            >
+              {isSavingPassword ? "Enregistrement..." : "Définir le mot de passe"}
+            </Button>
           </div>
         </CardContent>
       </Card>
