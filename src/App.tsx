@@ -24,6 +24,7 @@ import AdminActualites from "./pages/admin/AdminActualites";
 import AdminSondages from "./pages/admin/AdminSondages";
 import AdminAG from "./pages/admin/AdminAG";
 import AdminConseilSyndical from "./pages/admin/AdminConseilSyndical";
+import AdminBoard from "./pages/admin/AdminBoard";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Membres from "./pages/Membres";
@@ -75,6 +76,7 @@ const App = () => (
                 <Route path="/admin/ag" element={<ProtectedRoute requireAG><AdminAG /></ProtectedRoute>} />
                 <Route path="/admin/conseil-syndical" element={<ProtectedRoute requireAG><AdminConseilSyndical /></ProtectedRoute>} />
                 <Route path="/admin/sondages" element={<ProtectedRoute requireAG><AdminSondages /></ProtectedRoute>} />
+                <Route path="/admin/board" element={<ProtectedRoute requireAG><AdminBoard /></ProtectedRoute>} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route path="/confidentialite" element={<Confidentialite />} />
                 <Route path="/cookies" element={<Cookies />} />
