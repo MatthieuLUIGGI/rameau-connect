@@ -31,6 +31,8 @@ const AdminBoard = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [passwordExists, setPasswordExists] = useState<boolean | null>(null);
+  const [needsInitialSetup, setNeedsInitialSetup] = useState(false);
   const { toast } = useToast();
   const { session } = useAuth();
 
@@ -40,7 +42,22 @@ const AdminBoard = () => {
       setIsUnlocked(true);
       fetchProfiles();
     }
+    checkPasswordExists();
   }, []);
+
+  const checkPasswordExists = async () => {
+    try {
+      const { data, error } = await supabase.rpc('verify_admin_board_password', {
+        input_password: 'test',
+      });
+      setPasswordExists(data === false); // Si la fonction retourne false pour n'importe quel mot de passe, c'est qu'il y a déjà un mot de passe
+      if (!data) {
+        setNeedsInitialSetup(true);
+      }
+    } catch {
+      setPasswordExists(true);
+    }
+  };
 
   const fetchProfiles = async () => {
     setIsLoading(true);
@@ -124,11 +141,61 @@ const AdminBoard = () => {
       toast({ title: 'Mot de passe défini avec succès' });
       setNewPassword("");
       setConfirmPassword("");
+      setNeedsInitialSetup(false);
+      setPasswordExists(true);
     } catch {
       toast({ title: 'Erreur lors de la définition du mot de passe', variant: 'destructive' });
     }
     setIsSavingPassword(false);
   };
+
+  // Écran initial pour créer le mot de passe
+  if (needsInitialSetup) {
+    return (
+      <div className="container mx-auto px-4 pt-24 pb-8 flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <KeyRound className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <CardTitle>Configuration initiale</CardTitle>
+            <CardDescription>Créez un mot de passe pour sécuriser l'accès au tableau de bord admin</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder="Nouveau mot de passe (min. 8 caractères)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                placeholder="Confirmer le mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <Button
+                onClick={handleSetPassword}
+                className="w-full"
+                disabled={isSavingPassword || newPassword.length < 8 || !confirmPassword}
+              >
+                {isSavingPassword ? "Création en cours..." : "Créer le mot de passe"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!isUnlocked) {
     return (
