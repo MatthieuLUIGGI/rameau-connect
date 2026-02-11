@@ -76,7 +76,7 @@ const App = () => (
                 <Route path="/admin/ag" element={<ProtectedRoute requireAG><AdminAG /></ProtectedRoute>} />
                 <Route path="/admin/conseil-syndical" element={<ProtectedRoute requireAG><AdminConseilSyndical /></ProtectedRoute>} />
                 <Route path="/admin/sondages" element={<ProtectedRoute requireAG><AdminSondages /></ProtectedRoute>} />
-                <Route path="/admin/board" element={<ProtectedRoute requireAG><AdminBoard /></ProtectedRoute>} />
+                <Route path="/admin/board" element={<ProtectedRoute><AdminBoard /></ProtectedRoute>} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route path="/confidentialite" element={<Confidentialite />} />
                 <Route path="/cookies" element={<Cookies />} />
