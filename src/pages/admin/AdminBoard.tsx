@@ -1,24 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Lock, Eye, EyeOff, Users, Shield, KeyRound } from "lucide-react";
+import { Lock, Eye, EyeOff, Shield, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import MemberStats from "@/components/admin/board/MemberStats";
+import MemberFilters from "@/components/admin/board/MemberFilters";
+import MemberTable, { type ProfileWithRoles } from "@/components/admin/board/MemberTable";
+import MemberPagination from "@/components/admin/board/MemberPagination";
 
-interface ProfileWithRoles {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  apartment_number: number | null;
-  roles: string[];
-}
+const ITEMS_PER_PAGE = 15;
 
 const AdminBoard = () => {
   const [profiles, setProfiles] = useState<ProfileWithRoles[]>([]);
@@ -33,6 +28,10 @@ const AdminBoard = () => {
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [passwordExists, setPasswordExists] = useState<boolean | null>(null);
   const [needsInitialSetup, setNeedsInitialSetup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isTogglingRole, setIsTogglingRole] = useState<string | null>(null);
   const { toast } = useToast();
   const { session } = useAuth();
 
@@ -50,13 +49,8 @@ const AdminBoard = () => {
       const { data, error } = await supabase.rpc('admin_board_password_exists' as any);
       if (error) throw error;
       setPasswordExists(!!data);
-      if (!data) {
-        setNeedsInitialSetup(true);
-      } else {
-        setNeedsInitialSetup(false);
-      }
+      setNeedsInitialSetup(!data);
     } catch {
-      // En cas d'erreur, on suppose qu'un mot de passe existe déjà
       setPasswordExists(true);
       setNeedsInitialSetup(false);
     }
@@ -64,10 +58,10 @@ const AdminBoard = () => {
 
   const fetchProfiles = async () => {
     setIsLoading(true);
-    
+
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, apartment_number')
+      .select('id, first_name, last_name, email, apartment_number, created_at')
       .order('last_name', { ascending: true });
 
     if (profilesError) {
@@ -101,17 +95,107 @@ const AdminBoard = () => {
     setIsLoading(false);
   };
 
+  // --- Filtering & Pagination ---
+  const filteredProfiles = useMemo(() => {
+    let result = profiles;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          (p.first_name || '').toLowerCase().includes(q) ||
+          (p.last_name || '').toLowerCase().includes(q) ||
+          (p.email || '').toLowerCase().includes(q) ||
+          String(p.apartment_number ?? '').includes(q)
+      );
+    }
+
+    if (roleFilter === 'ag') {
+      result = result.filter((p) => p.roles.includes('ag'));
+    } else if (roleFilter === 'user') {
+      result = result.filter((p) => !p.roles.includes('ag'));
+    }
+
+    return result;
+  }, [profiles, searchQuery, roleFilter]);
+
+  const totalPages = Math.ceil(filteredProfiles.length / ITEMS_PER_PAGE);
+  const paginatedProfiles = filteredProfiles.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, roleFilter]);
+
+  // --- Stats ---
+  const agCount = profiles.filter((p) => p.roles.includes('ag')).length;
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentCount = profiles.filter(
+    (p) => p.created_at && new Date(p.created_at) >= thirtyDaysAgo
+  ).length;
+
+  // --- CSV Export ---
+  const handleExportCSV = () => {
+    const headers = ['Nom', 'Prénom', 'Email', 'Appartement', 'Rôle', 'Date inscription'];
+    const rows = filteredProfiles.map((p) => [
+      p.last_name || '',
+      p.first_name || '',
+      p.email || '',
+      p.apartment_number ?? '',
+      p.roles.includes('ag') ? 'AG' : 'Utilisateur',
+      p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '',
+    ]);
+
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `membres_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Export CSV téléchargé' });
+  };
+
+  // --- Role Management ---
+  const handleToggleRole = async (userId: string, hasAg: boolean) => {
+    setIsTogglingRole(userId);
+    try {
+      if (hasAg) {
+        const { error } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId)
+          .eq('role', 'ag');
+        if (error) throw error;
+        toast({ title: 'Rôle AG retiré' });
+      } else {
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({ user_id: userId, role: 'ag' });
+        if (error) throw error;
+        toast({ title: 'Rôle AG attribué' });
+      }
+      await fetchProfiles();
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
+    }
+    setIsTogglingRole(null);
+  };
+
+  // --- Password handlers ---
   const handleVerifyPassword = async () => {
     if (!password.trim()) return;
     setIsVerifying(true);
-
     try {
       const { data, error } = await supabase.rpc('verify_admin_board_password', {
         input_password: password,
       });
-
       if (error) throw error;
-
       if (data) {
         setIsUnlocked(true);
         sessionStorage.setItem('admin_board_unlocked', 'true');
@@ -123,7 +207,6 @@ const AdminBoard = () => {
     } catch {
       toast({ title: 'Erreur de vérification', variant: 'destructive' });
     }
-
     setIsVerifying(false);
     setPassword("");
   };
@@ -139,7 +222,7 @@ const AdminBoard = () => {
     }
     setIsSavingPassword(true);
     try {
-      const { data, error } = await supabase.rpc('set_admin_board_password', { new_password: newPassword });
+      const { error } = await supabase.rpc('set_admin_board_password', { new_password: newPassword });
       if (error) throw error;
       toast({ title: 'Mot de passe défini avec succès' });
       setNewPassword("");
@@ -152,7 +235,7 @@ const AdminBoard = () => {
     setIsSavingPassword(false);
   };
 
-  // Écran initial pour créer le mot de passe
+  // --- Initial setup screen ---
   if (needsInitialSetup) {
     return (
       <div className="container mx-auto px-4 pt-24 pb-8 flex items-center justify-center min-h-[60vh]">
@@ -200,6 +283,7 @@ const AdminBoard = () => {
     );
   }
 
+  // --- Password screen ---
   if (!isUnlocked) {
     return (
       <div className="container mx-auto px-4 pt-24 pb-8 flex items-center justify-center min-h-[60vh]">
@@ -247,6 +331,11 @@ const AdminBoard = () => {
     return (
       <div className="container mx-auto px-4 pt-24 pb-8">
         <Skeleton className="h-12 w-64 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+        </div>
         <Skeleton className="h-[400px] w-full" />
       </div>
     );
@@ -259,71 +348,37 @@ const AdminBoard = () => {
         Tableau de bord Admin
       </h1>
 
+      <MemberStats
+        totalMembers={profiles.length}
+        agMembers={agCount}
+        recentMembers={recentCount}
+      />
+
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Membres inscrits
-          </CardTitle>
-          <CardDescription>Total des personnes inscrites sur le site</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-5xl font-bold text-primary">{profiles.length}</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Liste des membres</CardTitle>
-          <CardDescription>Informations et rôles des personnes inscrites</CardDescription>
+          <CardDescription>Recherchez, filtrez et gérez les membres inscrits</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Prénom</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Appartement</TableHead>
-                  <TableHead>Rôle(s)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {profiles.map((profile) => (
-                  <TableRow key={profile.id}>
-                    <TableCell className="font-medium">{profile.last_name || '-'}</TableCell>
-                    <TableCell>{profile.first_name || '-'}</TableCell>
-                    <TableCell>{profile.email || '-'}</TableCell>
-                    <TableCell>{profile.apartment_number ?? '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 flex-wrap">
-                        {profile.roles.length > 0 ? (
-                          profile.roles.map((role) => (
-                            <Badge
-                              key={role}
-                              variant={role === 'ag' ? 'default' : 'secondary'}
-                            >
-                              {role === 'ag' ? 'AG' : 'Utilisateur'}
-                            </Badge>
-                          ))
-                        ) : (
-                          <Badge variant="secondary">Utilisateur</Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {profiles.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      Aucun membre inscrit
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <MemberFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            roleFilter={roleFilter}
+            onRoleFilterChange={setRoleFilter}
+            onExportCSV={handleExportCSV}
+          />
+          <MemberTable
+            profiles={paginatedProfiles}
+            onToggleRole={handleToggleRole}
+            isTogglingRole={isTogglingRole}
+          />
+          <MemberPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredProfiles.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
         </CardContent>
       </Card>
 
