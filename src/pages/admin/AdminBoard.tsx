@@ -47,15 +47,18 @@ const AdminBoard = () => {
 
   const checkPasswordExists = async () => {
     try {
-      const { data, error } = await supabase.rpc('verify_admin_board_password', {
-        input_password: 'test',
-      });
-      setPasswordExists(data === false); // Si la fonction retourne false pour n'importe quel mot de passe, c'est qu'il y a déjà un mot de passe
+      const { data, error } = await supabase.rpc('admin_board_password_exists' as any);
+      if (error) throw error;
+      setPasswordExists(!!data);
       if (!data) {
         setNeedsInitialSetup(true);
+      } else {
+        setNeedsInitialSetup(false);
       }
     } catch {
+      // En cas d'erreur, on suppose qu'un mot de passe existe déjà
       setPasswordExists(true);
+      setNeedsInitialSetup(false);
     }
   };
 
