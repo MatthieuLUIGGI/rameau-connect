@@ -441,6 +441,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_board_password_exists: { Args: never; Returns: boolean }
       get_poll_results: {
         Args: { poll_id: string }
         Returns: {
