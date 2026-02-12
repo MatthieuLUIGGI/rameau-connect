@@ -135,7 +135,13 @@ const AdminActualites = () => {
           await deleteFileFromUrl(previousFileUrl);
         }
         
-        // Créer une notification pour tous les utilisateurs lors de la modification
+        // Supprimer les anciennes notifications pour cette actualité avant d'en créer de nouvelles
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('type', 'actualite')
+          .eq('reference_id', editingActualite.id);
+
         const { data: usersData } = await supabase
           .from('profiles')
           .select('id');
