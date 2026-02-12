@@ -94,7 +94,13 @@ const AdminSondages = () => {
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
-        // Créer une notification pour tous les utilisateurs lors de la modification
+        // Supprimer les anciennes notifications pour ce sondage avant d'en créer de nouvelles
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('type', 'sondage')
+          .eq('reference_id', editingSondage.id);
+
         const { data: usersData } = await supabase
           .from('profiles')
           .select('id');

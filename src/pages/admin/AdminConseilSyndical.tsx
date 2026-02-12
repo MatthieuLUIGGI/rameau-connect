@@ -240,7 +240,13 @@ const AdminConseilSyndical = () => {
 
         if (error) throw error;
         
-        // Créer une notification pour tous les utilisateurs lors de la modification
+        // Supprimer les anciennes notifications pour ce compte rendu avant d'en créer de nouvelles
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('type', 'compte_rendu')
+          .eq('reference_id', editingCR.id);
+
         const { data: usersData } = await supabase
           .from('profiles')
           .select('id');
