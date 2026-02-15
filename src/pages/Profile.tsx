@@ -295,43 +295,6 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-destructive">
-          <CardHeader>
-            <CardTitle className="text-destructive">Zone dangereuse</CardTitle>
-            <CardDescription>
-              Actions irréversibles sur votre compte
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Supprimer mon compte
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Cette action est irréversible. Votre compte et toutes vos données seront définitivement supprimés.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    disabled={deletingAccount}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {deletingAccount && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Supprimer définitivement
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
