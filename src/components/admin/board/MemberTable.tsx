@@ -11,6 +11,7 @@ export interface ProfileWithRoles {
   apartment_number: number | null;
   roles: string[];
   created_at: string | null;
+  last_sign_in_at: string | null;
 }
 
 interface MemberTableProps {
@@ -30,7 +31,7 @@ const MemberTable = ({ profiles, onToggleRole, isTogglingRole }: MemberTableProp
             <TableHead>Email</TableHead>
             <TableHead>Appt.</TableHead>
             <TableHead>Rôle(s)</TableHead>
-            <TableHead>Inscrit le</TableHead>
+            <TableHead>Dernière connexion</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -53,13 +54,15 @@ const MemberTable = ({ profiles, onToggleRole, isTogglingRole }: MemberTableProp
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                  {profile.created_at
-                    ? new Date(profile.created_at).toLocaleDateString('fr-FR', {
+                  {profile.last_sign_in_at
+                    ? new Date(profile.last_sign_in_at).toLocaleString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
                       })
-                    : '-'}
+                    : 'Jamais'}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
