@@ -91,12 +91,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    if (!error) {
+    if (!error && data.user) {
+      // Update last_sign_in_at in profiles
+      await supabase
+        .from('profiles')
+        .update({ last_sign_in_at: new Date().toISOString() } as any)
+        .eq('id', data.user.id);
       navigate('/');
     }
     
