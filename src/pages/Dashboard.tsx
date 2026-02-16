@@ -1,14 +1,8 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { KeyRound, Users, Newspaper, BarChart3, Shield, MessageSquare, UserCog, LayoutDashboard } from "lucide-react";
+import { KeyRound, Newspaper, BarChart3, Shield, MessageSquare, UserCog, LayoutDashboard } from "lucide-react";
 
 const adminPages = [
-  {
-    path: "/membres",
-    label: "Membres",
-    description: "Voir le nombre de membres inscrits",
-    icon: Users,
-  },
   {
     path: "/admin/badges-vigik",
     label: "Badges Vigik",
@@ -22,6 +16,12 @@ const adminPages = [
     icon: UserCog,
   },
   {
+    path: "/admin/actualites",
+    label: "Actualités",
+    description: "Gérer les actualités de la résidence",
+    icon: Newspaper,
+  },
+  {
     path: "/admin/ag",
     label: "Assemblées Générales",
     description: "Gérer les comptes rendus d'AG",
@@ -32,12 +32,6 @@ const adminPages = [
     label: "Conseil Syndical",
     description: "Gérer les comptes rendus du conseil syndical",
     icon: Shield,
-  },
-  {
-    path: "/admin/actualites",
-    label: "Actualités",
-    description: "Gérer les actualités de la résidence",
-    icon: Newspaper,
   },
   {
     path: "/admin/sondages",
