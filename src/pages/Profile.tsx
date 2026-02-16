@@ -152,7 +152,7 @@ const Profile = () => {
     setDeletingAccount(true);
 
     try {
-      const { error } = await supabase.functions.invoke('delete-account');
+      const { error } = await supabase.functions.invoke('delete-user');
 
       if (error) throw error;
 
