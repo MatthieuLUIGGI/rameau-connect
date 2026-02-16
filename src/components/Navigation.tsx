@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn, Shield } from "lucide-react";
+import { Menu, X, Home, KeyRound, Users, Newspaper, BarChart3, Mail, User, LogOut, LogIn, Shield, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "@/components/NotificationBell";
@@ -80,25 +80,10 @@ const Navigation = () => {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link to="/membres">Nombre membres</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/badges-vigik">Gérer les badges Vigik</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/syndic">Gérer le syndic</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/ag">Gérer les AG</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/conseil-syndical">Gérer le Conseil Syndical</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/actualites">Gérer les actualités</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/sondages">Gérer les consultations</Link>
+                        <Link to="/dashboard">
+                          <LayoutDashboard className="h-4 w-4 mr-2" />
+                          Dashboard
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>
@@ -166,57 +151,14 @@ const Navigation = () => {
                     <span className="font-medium">Mon profil</span>
                   </Link>
                   {isAG && (
-                    <>
-                      <Link
-                        to="/membres"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Nombre membres</span>
-                      </Link>
-                      <Link
-                        to="/admin/badges-vigik"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Gérer les badges Vigik</span>
-                      </Link>
-                      <Link
-                        to="/admin/syndic"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Gérer le syndic</span>
-                      </Link>
-                      <Link
-                        to="/admin/ag"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Gérer les AG</span>
-                      </Link>
-                      <Link
-                        to="/admin/conseil-syndical"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Gérer le Conseil Syndical</span>
-                      </Link>
-                      <Link
-                        to="/admin/actualites"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Gérer les actualités</span>
-                      </Link>
-                      <Link
-                        to="/admin/sondages"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <span className="font-medium">Gérer les consultations</span>
-                      </Link>
-                    </>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <LayoutDashboard className="h-5 w-5" />
+                      <span className="font-medium">Dashboard</span>
+                    </Link>
                   )}
                   <button
                     onClick={() => {
