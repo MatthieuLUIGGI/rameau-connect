@@ -22,7 +22,7 @@ const Contact = () => {
           Contactez-nous
         </h1>
 
-        <div className="flex flex-col items-center gap-6 mb-8">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-10 mb-8">
           <div className="flex items-center gap-3">
             <Mail className="h-6 w-6 text-primary shrink-0" />
             <div>
@@ -36,7 +36,7 @@ const Contact = () => {
             </div>
           </div>
 
-          <div className="rounded-lg overflow-hidden border h-[220px] w-full max-w-md ml-auto">
+          <div className="rounded-lg overflow-hidden border h-[220px] w-[300px] shrink-0">
             <MapContainer
               center={POSITION}
               zoom={16}
