@@ -445,7 +445,6 @@ export type Database = {
     }
     Functions: {
       admin_board_password_exists: { Args: never; Returns: boolean }
-      delete_own_account: { Args: never; Returns: undefined }
       get_poll_results: {
         Args: { poll_id: string }
         Returns: {
