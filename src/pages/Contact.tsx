@@ -31,27 +31,6 @@ const Contact = () => {
       <section className="pb-16 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Carte Leaflet */}
-            <div className="rounded-lg overflow-hidden border h-[350px] md:h-full md:min-h-[350px]">
-              <MapContainer
-                center={POSITION}
-                zoom={16}
-                scrollWheelZoom={false}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={POSITION}>
-                  <Popup>
-                    Résidence Le Rameau<br />
-                    5 Rue André Malraux, 21000 Dijon
-                  </Popup>
-                </Marker>
-              </MapContainer>
-            </div>
-
             {/* Informations pratiques */}
             <div>
               <h2 className="text-2xl font-bold mb-6 text-foreground">
@@ -84,6 +63,27 @@ const Contact = () => {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+
+            {/* Carte Leaflet */}
+            <div className="rounded-lg overflow-hidden border h-[350px] md:h-full md:min-h-[350px]">
+              <MapContainer
+                center={POSITION}
+                zoom={16}
+                scrollWheelZoom={false}
+                style={{ height: "100%", width: "100%" }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={POSITION}>
+                  <Popup>
+                    Résidence Le Rameau<br />
+                    5 Rue André Malraux, 21000 Dijon
+                  </Popup>
+                </Marker>
+              </MapContainer>
             </div>
           </div>
         </div>
