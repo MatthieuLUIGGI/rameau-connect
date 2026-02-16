@@ -12,7 +12,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-const POSITION: [number, number] = [47.3220, 5.0415];
+const POSITION: [number, number] = [47.3135, 5.0341];
 
 const Contact = () => {
   return (
