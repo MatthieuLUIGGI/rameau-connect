@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { MapPin, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -22,31 +22,21 @@ const Contact = () => {
           Contactez-nous
         </h1>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="flex flex-col gap-4 justify-center">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-primary mt-1 shrink-0" />
-              <div>
-                <p className="font-semibold text-foreground">Adresse</p>
-                <p className="text-muted-foreground">5 Rue André Malraux</p>
-                <p className="text-muted-foreground">21000 Dijon</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5 text-primary mt-1 shrink-0" />
-              <div>
-                <p className="font-semibold text-foreground">Email</p>
-                <a
-                  href="mailto:residence.lerameau@laposte.net"
-                  className="text-primary hover:text-primary/80 transition-colors underline"
-                >
-                  residence.lerameau@laposte.net
-                </a>
-              </div>
+        <div className="flex flex-col items-center gap-6 mb-8">
+          <div className="flex items-center gap-3">
+            <Mail className="h-6 w-6 text-primary shrink-0" />
+            <div>
+              <p className="font-semibold text-foreground text-lg">Email</p>
+              <a
+                href="mailto:residence.lerameau@laposte.net"
+                className="text-primary hover:text-primary/80 transition-colors underline text-lg"
+              >
+                residence.lerameau@laposte.net
+              </a>
             </div>
           </div>
 
-          <div className="rounded-lg overflow-hidden border h-[300px] md:h-[350px]">
+          <div className="rounded-lg overflow-hidden border h-[220px] w-full max-w-md ml-auto">
             <MapContainer
               center={POSITION}
               zoom={16}
