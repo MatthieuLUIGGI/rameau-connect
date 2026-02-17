@@ -85,7 +85,6 @@ const Navigation = () => {
                           Dashboard
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                     </>
                   )}
 {user?.email === "jb.luiggi@sfr.fr" && (
@@ -94,7 +93,7 @@ const Navigation = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/admin/board">
                           <Shield className="h-4 w-4 mr-2" />
-                          Pour papa
+                          Enceinte JBL
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -181,7 +180,7 @@ const Navigation = () => {
                         className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
                       >
                         <Shield className="h-5 w-5" />
-                        <span className="font-medium">Pour papa</span>
+                        <span className="font-medium">Enceinte JBL</span>
                       </Link>
                       <div className="h-px bg-border my-2" />
                     </>
