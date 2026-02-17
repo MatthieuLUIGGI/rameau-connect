@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { Shield, Users, KeyRound, BarChart3, Menu, X } from "lucide-react";
+import { Shield, Users, KeyRound, BarChart3, Menu, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { title: "Vue d'ensemble", path: "/admin/board", icon: BarChart3, end: true },
   { title: "Membres", path: "/admin/board/members", icon: Users, end: false },
+  { title: "Logs", path: "/admin/board/logs", icon: FileText, end: false },
   { title: "Mot de passe", path: "/admin/board/password", icon: KeyRound, end: false },
 ];
 

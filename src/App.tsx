@@ -28,6 +28,7 @@ import AdminBoard from "./pages/admin/AdminBoard";
 import BoardOverview from "./pages/admin/board/BoardOverview";
 import BoardMembers from "./pages/admin/board/BoardMembers";
 import BoardPassword from "./pages/admin/board/BoardPassword";
+import BoardLogs from "./pages/admin/board/BoardLogs";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Membres from "./pages/Membres";
@@ -84,6 +85,7 @@ const App = () => (
                 <Route path="/admin/board" element={<ProtectedRoute><AdminBoard /></ProtectedRoute>}>
                   <Route index element={<BoardOverview />} />
                   <Route path="members" element={<BoardMembers />} />
+                  <Route path="logs" element={<BoardLogs />} />
                   <Route path="password" element={<BoardPassword />} />
                 </Route>
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
