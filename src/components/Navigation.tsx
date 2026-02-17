@@ -88,7 +88,7 @@ const Navigation = () => {
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  {user?.email === "jb.luiggi@sfr.fr" && (
+{user?.email === "jb.luiggi@sfr.fr" && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
@@ -97,6 +97,7 @@ const Navigation = () => {
                           Pour papa
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                     </>
                   )}
                   <DropdownMenuItem onClick={() => signOut()}>
@@ -171,15 +172,19 @@ const Navigation = () => {
                       <span className="font-medium">Dashboard</span>
                     </Link>
                   )}
-                  {user?.email === "jb.luiggi@sfr.fr" && (
-                    <Link
-                      to="/admin/board"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      <Shield className="h-5 w-5" />
-                      <span className="font-medium">Pour papa</span>
-                    </Link>
+{user?.email === "jb.luiggi@sfr.fr" && (
+                    <>
+                      <div className="h-px bg-border my-2" />
+                      <Link
+                        to="/admin/board"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <Shield className="h-5 w-5" />
+                        <span className="font-medium">Pour papa</span>
+                      </Link>
+                      <div className="h-px bg-border my-2" />
+                    </>
                   )}
                   <button
                     onClick={() => {
