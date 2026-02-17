@@ -88,6 +88,17 @@ const Navigation = () => {
                       <DropdownMenuSeparator />
                     </>
                   )}
+                  {user?.email === "jb.luiggi@sfr.fr" && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/board">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Pour papa
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuItem onClick={() => signOut()}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Déconnexion
@@ -158,6 +169,16 @@ const Navigation = () => {
                     >
                       <LayoutDashboard className="h-5 w-5" />
                       <span className="font-medium">Dashboard</span>
+                    </Link>
+                  )}
+                  {user?.email === "jb.luiggi@sfr.fr" && (
+                    <Link
+                      to="/admin/board"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <Shield className="h-5 w-5" />
+                      <span className="font-medium">Pour papa</span>
                     </Link>
                   )}
                   <button
