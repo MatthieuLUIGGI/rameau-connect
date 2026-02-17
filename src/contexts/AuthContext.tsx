@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { logAudit } from '@/lib/auditLog';
 
 interface AuthContextType {
   user: User | null;
@@ -102,6 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .from('profiles')
         .update({ last_sign_in_at: new Date().toISOString() } as any)
         .eq('id', data.user.id);
+      logAudit({ action: 'login', page: '/auth' });
       navigate('/');
     }
     
@@ -109,6 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    await logAudit({ action: 'logout' });
     await supabase.auth.signOut();
     navigate('/auth');
   };

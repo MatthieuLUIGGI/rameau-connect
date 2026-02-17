@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { logAudit } from "@/lib/auditLog";
 import MemberFilters from "@/components/admin/board/MemberFilters";
 import MemberTable, { type ProfileWithRoles } from "@/components/admin/board/MemberTable";
 import MemberPagination from "@/components/admin/board/MemberPagination";
@@ -109,6 +110,7 @@ const BoardMembers = () => {
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: 'Export CSV téléchargé' });
+    logAudit({ action: 'export', entityType: 'membres', details: { count: filteredProfiles.length } });
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -119,6 +121,7 @@ const BoardMembers = () => {
       });
       if (error) throw error;
       toast({ title: 'Compte supprimé avec succès' });
+      logAudit({ action: 'delete', entityType: 'profile', entityId: userId });
       await fetchProfiles();
     } catch (err: any) {
       toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
