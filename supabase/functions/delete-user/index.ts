@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Create client with user's token to identify the user
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -34,35 +35,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Parse body to check if an admin is deleting another user
-    let targetUserId = user.id
-    try {
-      const body = await req.json()
-      if (body.user_id && body.user_id !== user.id) {
-        // Verify caller has AG role
-        const { data: hasRole } = await supabaseClient.rpc('has_role', {
-          _user_id: user.id,
-          _role: 'ag'
-        })
-        if (!hasRole) {
-          return new Response(
-            JSON.stringify({ error: 'Forbidden: AG role required' }),
-            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
-        targetUserId = body.user_id
-      }
-    } catch {
-      // No body or invalid JSON — delete own account
-    }
-
+    // Create admin client to delete user
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(targetUserId)
+    // Delete user - cascading deletes will clean up related data
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
 
     if (deleteError) {
       console.error('Delete error:', deleteError)

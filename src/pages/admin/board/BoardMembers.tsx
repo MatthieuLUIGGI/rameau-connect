@@ -111,14 +111,18 @@ const BoardMembers = () => {
     toast({ title: 'Export CSV téléchargé' });
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleToggleRole = async (userId: string, hasAg: boolean) => {
     setIsTogglingRole(userId);
     try {
-      const { error } = await supabase.functions.invoke('delete-user', {
-        body: { user_id: userId },
-      });
-      if (error) throw error;
-      toast({ title: 'Compte supprimé avec succès' });
+      if (hasAg) {
+        const { error } = await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', 'ag');
+        if (error) throw error;
+        toast({ title: 'Rôle AG retiré' });
+      } else {
+        const { error } = await supabase.from('user_roles').insert({ user_id: userId, role: 'ag' });
+        if (error) throw error;
+        toast({ title: 'Rôle AG attribué' });
+      }
       await fetchProfiles();
     } catch (err: any) {
       toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
@@ -146,8 +150,8 @@ const BoardMembers = () => {
         />
         <MemberTable
           profiles={paginatedProfiles}
-          onDeleteUser={handleDeleteUser}
-          isDeletingUser={isTogglingRole}
+          onToggleRole={handleToggleRole}
+          isTogglingRole={isTogglingRole}
         />
         <MemberPagination
           currentPage={currentPage}
