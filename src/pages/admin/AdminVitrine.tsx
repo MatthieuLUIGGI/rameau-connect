@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ImagePlus, Save, Trash2, Loader2, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { logAudit } from "@/lib/auditLog";
+import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from "@/lib/imageOptimizer";
 
 const AdminVitrine = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -38,26 +39,39 @@ const AdminVitrine = () => {
       toast({ title: "Erreur", description: "Seules les images sont acceptées", variant: "destructive" });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Erreur", description: "L'image ne doit pas dépasser 5 Mo", variant: "destructive" });
-      return;
-    }
 
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const fileName = `vitrine-${Date.now()}.${ext}`;
 
-    const { error } = await supabase.storage.from("vitrine").upload(fileName, file, { upsert: true });
-    if (error) {
-      toast({ title: "Erreur", description: "Impossible d'uploader l'image", variant: "destructive" });
-      setUploading(false);
-      return;
+    try {
+      let fileToUpload: Blob = file;
+      let ext = file.name.split(".").pop() || "jpg";
+
+      if (needsOptimization(file)) {
+        const result = await optimizeImage(file);
+        fileToUpload = result.blob;
+        ext = result.extension;
+        const reduction = calculateReduction(result.originalSize, result.optimizedSize);
+        toast({
+          title: "Image optimisée",
+          description: `${formatFileSize(result.originalSize)} → ${formatFileSize(result.optimizedSize)} (-${reduction}%)`,
+        });
+      }
+
+      const fileName = `vitrine-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("vitrine").upload(fileName, fileToUpload, { upsert: true, contentType: `image/${ext === "jpg" ? "jpeg" : ext}` });
+      if (error) {
+        toast({ title: "Erreur", description: "Impossible d'uploader l'image", variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from("vitrine").getPublicUrl(fileName);
+      setImageUrl(urlData.publicUrl);
+      toast({ title: "Image uploadée avec succès" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de traiter l'image", variant: "destructive" });
     }
-
-    const { data: urlData } = supabase.storage.from("vitrine").getPublicUrl(fileName);
-    setImageUrl(urlData.publicUrl);
     setUploading(false);
-    toast({ title: "Image uploadée avec succès" });
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -163,7 +177,7 @@ const AdminVitrine = () => {
                 <div className="flex flex-col items-center gap-3 text-muted-foreground p-8">
                   <Upload className="h-12 w-12" />
                   <p className="text-center font-medium">Glissez-déposez une image ici</p>
-                  <p className="text-sm">ou cliquez pour parcourir (max 5 Mo)</p>
+                  <p className="text-sm">ou cliquez pour parcourir</p>
                 </div>
               )}
             </div>

@@ -28,7 +28,7 @@ const Home = () => {
       </div>
 
       {/* Hero Content - Split Layout */}
-      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-16">
+      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-16 max-w-5xl">
         {/* Left side - Title + Buttons */}
         <div className="flex-1 text-center lg:text-left">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in">
@@ -79,10 +79,10 @@ const Home = () => {
               {(vitrine.description || vitrine.credits) && (
                 <div className="p-4 space-y-1">
                   {vitrine.description && (
-                    <p className="text-primary-foreground text-sm leading-relaxed">{vitrine.description}</p>
+                    <p className="text-white text-sm leading-relaxed">{vitrine.description}</p>
                   )}
                   {vitrine.credits && (
-                    <p className="text-primary-foreground/70 text-xs italic">{vitrine.credits}</p>
+                    <p className="text-white/70 text-xs italic">{vitrine.credits}</p>
                   )}
                 </div>
               )}
