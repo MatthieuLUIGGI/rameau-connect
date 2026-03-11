@@ -28,9 +28,9 @@ const Home = () => {
       </div>
 
       {/* Hero Content - Split Layout */}
-      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-16 max-w-5xl">
+      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 py-16 max-w-6xl">
         {/* Left side - Title + Buttons */}
-        <div className="flex-1 text-center lg:text-left">
+        <div className="flex-1 text-center lg:text-left lg:pr-8">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in">
             <span className="block mb-2">Copropriété</span>
             <span className="block bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
@@ -69,7 +69,7 @@ const Home = () => {
 
         {/* Right side - Vitrine */}
         {vitrine?.image_url && (
-          <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md animate-fade-in" style={{ animationDelay: "600ms" }}>
+          <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md lg:mt-8 animate-fade-in" style={{ animationDelay: "600ms" }}>
             <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl border border-primary-foreground/20 overflow-hidden shadow-2xl">
               <img
                 src={vitrine.image_url}
