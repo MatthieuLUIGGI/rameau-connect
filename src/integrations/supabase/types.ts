@@ -443,6 +443,33 @@ export type Database = {
         }
         Relationships: []
       }
+      vitrine: {
+        Row: {
+          created_at: string | null
+          credits: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       votes: {
         Row: {
           apartment_number: number
