@@ -84,7 +84,6 @@ const Home = () => {
                   {vitrine.credits && (
                     <p className="text-white/70 text-xs italic">{vitrine.credits}</p>
                   )}
-                  )}
                 </div>
               )}
             </div>
