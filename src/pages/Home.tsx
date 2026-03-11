@@ -28,7 +28,7 @@ const Home = () => {
       </div>
 
       {/* Hero Content - Split Layout */}
-      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12 py-16 pt-20 max-w-5xl">
+      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-16 max-w-5xl">
         {/* Left side - Title + Buttons */}
         <div className="flex-1 text-center lg:text-left">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in">
