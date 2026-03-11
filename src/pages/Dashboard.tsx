@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { KeyRound, Newspaper, BarChart3, Shield, MessageSquare, UserCog, LayoutDashboard } from "lucide-react";
+import { KeyRound, Newspaper, BarChart3, Shield, MessageSquare, UserCog, LayoutDashboard, ImagePlus } from "lucide-react";
 
 const adminPages = [
   {
