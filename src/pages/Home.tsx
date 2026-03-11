@@ -69,7 +69,7 @@ const Home = () => {
 
         {/* Right side - Vitrine */}
         {vitrine?.image_url && (
-          <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md animate-fade-in" style={{ animationDelay: "600ms" }}>
+          <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md lg:mt-8 animate-fade-in" style={{ animationDelay: "600ms" }}>
             <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl border border-primary-foreground/20 overflow-hidden shadow-2xl">
               <img
                 src={vitrine.image_url}
