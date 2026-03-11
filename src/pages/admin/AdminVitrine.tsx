@@ -177,7 +177,7 @@ const AdminVitrine = () => {
                 <div className="flex flex-col items-center gap-3 text-muted-foreground p-8">
                   <Upload className="h-12 w-12" />
                   <p className="text-center font-medium">Glissez-déposez une image ici</p>
-                  <p className="text-sm">ou cliquez pour parcourir (max 5 Mo)</p>
+                  <p className="text-sm">ou cliquez pour parcourir</p>
                 </div>
               )}
             </div>

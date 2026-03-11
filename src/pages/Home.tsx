@@ -79,10 +79,11 @@ const Home = () => {
               {(vitrine.description || vitrine.credits) && (
                 <div className="p-4 space-y-1">
                   {vitrine.description && (
-                    <p className="text-primary-foreground text-sm leading-relaxed">{vitrine.description}</p>
+                    <p className="text-white text-sm leading-relaxed">{vitrine.description}</p>
                   )}
                   {vitrine.credits && (
-                    <p className="text-primary-foreground/70 text-xs italic">{vitrine.credits}</p>
+                    <p className="text-white/70 text-xs italic">{vitrine.credits}</p>
+                  )}
                   )}
                 </div>
               )}
