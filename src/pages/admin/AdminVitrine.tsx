@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ImagePlus, Save, Trash2, Loader2, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { logAudit } from "@/lib/auditLog";
+import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from "@/lib/imageOptimizer";
 
 const AdminVitrine = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
