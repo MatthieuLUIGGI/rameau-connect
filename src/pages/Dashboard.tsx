@@ -39,6 +39,12 @@ const adminPages = [
     description: "Gérer les sondages et consultations",
     icon: MessageSquare,
   },
+  {
+    path: "/admin/vitrine",
+    label: "Vitrine",
+    description: "Gérer la photo de la vitrine de la résidence",
+    icon: ImagePlus,
+  },
 ];
 
 const Dashboard = () => {
