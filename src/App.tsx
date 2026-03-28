@@ -35,6 +35,7 @@ import Membres from "./pages/Membres";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import AdminVitrine from "./pages/admin/AdminVitrine";
+import Vitrine from "./pages/Vitrine";
 import { Analytics } from "@vercel/analytics/react";
 import { CookieConsentProvider, useCookieConsent } from "@/contexts/CookieConsentContext";
 import CookieBanner from "@/components/CookieBanner";
@@ -74,6 +75,7 @@ const App = () => (
                 <Route path="/conseil-syndical" element={<ProtectedRoute><ConseilSyndical /></ProtectedRoute>} />
                 <Route path="/sondages" element={<ProtectedRoute><Sondages /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/vitrine" element={<Vitrine />} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/membres" element={<ProtectedRoute requireAG><Membres /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute requireAG><Dashboard /></ProtectedRoute>} />
