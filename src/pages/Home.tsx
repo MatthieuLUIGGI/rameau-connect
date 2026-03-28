@@ -1,20 +1,10 @@
-import { useState, useEffect } from "react";
-import { KeyRound, Users, Newspaper, FileText, ArrowRight, Sparkles } from "lucide-react";
+import { KeyRound, Users, Newspaper, FileText, ArrowRight, Sparkles, Image } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-rameau.jpg";
 
 const Home = () => {
-  const [vitrine, setVitrine] = useState<{ image_url: string | null; description: string | null; credits: string | null } | null>(null);
-
-  useEffect(() => {
-    supabase.from("vitrine").select("image_url, description, credits").limit(1).single().then(({ data }) => {
-      if (data) setVitrine(data);
-    });
-  }, []);
-
   return <div className="min-h-screen">
     {/* Hero Section */}
     <section className="relative min-h-[80vh] flex items-center overflow-hidden">
@@ -27,68 +17,48 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Hero Content - Split Layout */}
-      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 py-16 max-w-6xl">
-        {/* Left side - Title + Buttons */}
-        <div className="flex-1 text-center lg:text-left lg:pr-8">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in">
-            <span className="block mb-2">Copropriété</span>
-            <span className="block bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
-              Le Rameau
-            </span>
-          </h1>
+      {/* Hero Content - Centered */}
+      <div className="relative z-10 container mx-auto px-4 flex flex-col items-center justify-center py-16">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in text-center">
+          <span className="block mb-2">Copropriété</span>
+          <span className="block bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
+            Le Rameau
+          </span>
+        </h1>
 
-          <div className="flex flex-col gap-4 justify-center lg:justify-start items-center lg:items-start animate-fade-in" style={{ animationDelay: "400ms" }}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center lg:items-start">
-              <Link to="/actualites">
-                <Button size="lg" className="group bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                  Voir les actualités
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link to="/contact">
-                <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
-                  Nous contacter
-                </Button>
-              </Link>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center lg:items-start">
-              <a href="/documents/livret-accueil.pdf" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
-                  Livret d'accueil
-                </Button>
-              </a>
-              <a href="/documents/reglement-copropriete.pdf" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
-                  Règlement de copropriété
-                </Button>
-              </a>
-            </div>
+        <div className="flex flex-col gap-4 items-center animate-fade-in" style={{ animationDelay: "400ms" }}>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <Link to="/actualites">
+              <Button size="lg" className="group bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg hover:shadow-xl transition-all duration-300">
+                Voir les actualités
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/contact">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
+                Nous contacter
+              </Button>
+            </Link>
           </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <a href="/documents/livret-accueil.pdf" target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
+                Livret d'accueil
+              </Button>
+            </a>
+            <a href="/documents/reglement-copropriete.pdf" target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
+                Règlement de copropriété
+              </Button>
+            </a>
+          </div>
+          <Link to="/vitrine">
+            <Button size="lg" variant="outline" className="border-primary-foreground/30 bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg">
+              <Image className="h-4 w-4 mr-2" />
+              Vitrine
+            </Button>
+          </Link>
         </div>
-
-        {/* Right side - Vitrine */}
-        {vitrine?.image_url && (
-          <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md lg:mt-8 animate-fade-in" style={{ animationDelay: "600ms" }}>
-            <div className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl border border-primary-foreground/20 overflow-hidden shadow-2xl">
-              <img
-                src={vitrine.image_url}
-                alt="Vitrine de la copropriété"
-                className="w-full h-auto max-h-[350px] object-cover"
-              />
-              {(vitrine.description || vitrine.credits) && (
-                <div className="p-4 space-y-1">
-                  {vitrine.description && (
-                    <p className="text-white text-sm leading-relaxed">{vitrine.description}</p>
-                  )}
-                  {vitrine.credits && (
-                    <p className="text-white/70 text-xs italic">{vitrine.credits}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Scroll Indicator */}

@@ -35,6 +35,7 @@ import Membres from "./pages/Membres";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import AdminVitrine from "./pages/admin/AdminVitrine";
+import Vitrine from "./pages/Vitrine";
 import { Analytics } from "@vercel/analytics/react";
 import { CookieConsentProvider, useCookieConsent } from "@/contexts/CookieConsentContext";
 import CookieBanner from "@/components/CookieBanner";
