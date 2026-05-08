@@ -9,13 +9,7 @@ const Home = () => {
     {/* Hero Section */}
     <section className="relative min-h-[80vh] flex items-center overflow-hidden">
       {/* Background Image */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroImage})` }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/70 to-background/95"></div>
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary-foreground/5 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-foreground/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-cover" style={{ backgroundImage: `url(${heroImage})`, backgroundPosition: "center 25%" }} />
 
       {/* Hero Content - Centered */}
       <div className="relative z-10 container mx-auto px-4 flex flex-col items-center justify-center py-16">
@@ -61,12 +55,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-primary-foreground/30 flex items-start justify-center p-2">
-          <div className="w-1 h-3 bg-primary-foreground/50 rounded-full"></div>
-        </div>
-      </div>
     </section>
 
     {/* Quick Access Section */}
