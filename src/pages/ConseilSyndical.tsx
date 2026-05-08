@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 interface CompteRendu {
   id: string;
   title: string;
-  file_url: string | null;
+  signed_url: string | null;
   link_url: string | null;
   date: string;
   created_at: string;
@@ -29,29 +29,9 @@ const ConseilSyndical = () => {
   const { isAG, session } = useAuth();
 
   useEffect(() => {
-    // Check if already unlocked in session
-    const unlocked = sessionStorage.getItem('conseil_syndical_unlocked');
-    if (unlocked === 'true') {
-      setIsUnlocked(true);
-      fetchComptesRendus();
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const fetchComptesRendus = async () => {
-    const { data, error } = await supabase
-      .from('comptes_rendus_conseil_syndical')
-      .select('*')
-      .order('order_index', { ascending: true });
-    
-    if (error) {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-    } else {
-      setComptesRendus(data || []);
-    }
+    // Access requires re-entering the password each session — no client-side bypass.
     setIsLoading(false);
-  };
+  }, []);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,20 +44,17 @@ const ConseilSyndical = () => {
     setIsVerifying(true);
 
     try {
-      // Use RPC function instead of Edge Function
-      const { data, error } = await supabase.rpc('verify_conseil_password', {
-        input_password: password
+      // Edge function verifies the password server-side and returns short-lived signed URLs.
+      const { data, error } = await supabase.functions.invoke('get-conseil-files', {
+        body: { password },
       });
 
-      if (error) throw error;
-
-      if (data === true) {
-        setIsUnlocked(true);
-        sessionStorage.setItem('conseil_syndical_unlocked', 'true');
-        toast({ title: 'Accès autorisé', description: 'Bienvenue dans l\'espace Conseil Syndical' });
-        fetchComptesRendus();
-      } else {
+      if (error || !data?.items) {
         toast({ title: 'Erreur', description: 'Mot de passe incorrect', variant: 'destructive' });
+      } else {
+        setComptesRendus(data.items as CompteRendu[]);
+        setIsUnlocked(true);
+        toast({ title: 'Accès autorisé', description: 'Bienvenue dans l\'espace Conseil Syndical' });
       }
     } catch (error: any) {
       console.error('Password verification error:', error);
@@ -191,7 +168,7 @@ const ConseilSyndical = () => {
           {slots.map((cr, index) => {
             if (cr) {
               const isLink = !!cr.link_url;
-              const displayUrl = cr.link_url || cr.file_url;
+              const displayUrl = cr.link_url || cr.signed_url;
 
               return (
                 <Card 
