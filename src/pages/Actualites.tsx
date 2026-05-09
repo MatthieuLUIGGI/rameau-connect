@@ -9,7 +9,6 @@ interface Actualite {
   id: string;
   title: string;
   excerpt: string | null;
-  content: string;
   image_url: string | null;
   published_at: string;
   file_url?: string | null;
@@ -22,42 +21,22 @@ const Actualites = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Transforme le contenu HTML en texte brut pour l'aperçu (liste)
-  const toPlainText = (html: string) =>
-    html
-      .replace(/<[^>]*>/g, " ") // retire les balises
-      .replace(/&nbsp;|&amp;|&quot;|&lt;|&gt;/g, (m) => {
-        const map: Record<string, string> = {
-          "&nbsp;": " ",
-          "&amp;": "&",
-          "&quot;": '"',
-          "&lt;": "<",
-          "&gt;": ">",
-        };
-        return map[m] ?? " ";
-      })
-      .replace(/\s+/g, " ")
-      .trim();
-
   useEffect(() => {
     fetchActualites();
   }, []);
 
   const fetchActualites = async () => {
+    const nowIso = new Date().toISOString();
     const { data, error } = await supabase
       .from('actualites')
-      .select('*')
+      .select('id,title,excerpt,image_url,published_at,file_url,priority,expires_at')
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .order('published_at', { ascending: false });
     
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
-      // Filtrer les actualités expirées
-      const now = new Date();
-      const filteredData = ((data || []) as unknown as Actualite[]).filter(actualite => {
-        if (!actualite.expires_at) return true;
-        return new Date(actualite.expires_at) > now;
-      });
+      const filteredData = (data || []) as unknown as Actualite[];
       
       // Séparer les actualités épinglées (urgent, important) des autres (normal, info)
       const pinnedNews = filteredData.filter(a => a.priority === 'urgent' || a.priority === 'important');
@@ -176,13 +155,6 @@ const Actualites = () => {
                     </p>
                   )}
                   
-                  {/* Aperçu du contenu: si pas d'extrait, on affiche le contenu converti en texte */}
-                  {!article.excerpt && (
-                    <p className="text-foreground leading-relaxed line-clamp-3">
-                      {toPlainText(article.content)}
-                    </p>
-                  )}
-                  
                   <div className="flex items-center gap-4 mt-2">
                     <div className="flex items-center gap-2 text-primary font-medium">
                       <span>Lire la suite</span>
@@ -206,6 +178,8 @@ const Actualites = () => {
                       <img 
                         src={article.image_url} 
                         alt={article.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-auto object-cover"
                       />
                     </div>

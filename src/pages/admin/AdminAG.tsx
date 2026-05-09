@@ -29,7 +29,7 @@ import { EmptyAGSlot } from '@/components/admin/EmptyAGSlot';
 interface CompteRendu {
   id: string;
   title: string;
-  file_url: string;
+  file_url: string | null;
   date: string;
   created_at: string;
   order_index: number;
@@ -159,17 +159,7 @@ const AdminAG = () => {
       return;
     }
 
-    if (!editingCR && !file) {
-      toast({ 
-        title: 'Erreur', 
-        description: 'Veuillez sélectionner un fichier PDF', 
-        variant: 'destructive' 
-      });
-      setIsUploading(false);
-      return;
-    }
-    
-    let fileUrl = editingCR?.file_url || '';
+    let fileUrl: string | null = editingCR?.file_url || null;
 
     if (file) {
       const uploadedUrl = await uploadFile(file);
@@ -251,15 +241,16 @@ const AdminAG = () => {
     setIsUploading(false);
   };
 
-  const handleDelete = async (id: string, fileUrl: string) => {
+  const handleDelete = async (id: string, fileUrl: string | null) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte rendu ?')) return;
-    
-    const urlParts = fileUrl.split('/');
-    const fileName = urlParts[urlParts.length - 1];
 
-    await supabase.storage
-      .from('ag-reports')
-      .remove([fileName]);
+    if (fileUrl) {
+      const urlParts = fileUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      await supabase.storage
+        .from('ag-reports')
+        .remove([fileName]);
+    }
 
     const { error } = await supabase
       .from('comptes_rendus_ag')
@@ -385,8 +376,8 @@ const AdminAG = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="file">
-                Fichier PDF {!editingCR && '*'}
-                {editingCR && ' (laisser vide pour conserver le fichier actuel)'}
+                Fichier PDF (optionnel)
+                {editingCR ? ' — laisser vide pour conserver le fichier actuel' : ' — laisser vide pour marquer comme « Document en attente »'}
               </Label>
               <div className="flex items-center gap-2">
                 <Input

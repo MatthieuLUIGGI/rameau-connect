@@ -7,7 +7,7 @@ import { Pencil, Trash2, GripVertical } from 'lucide-react';
 interface CompteRendu {
   id: string;
   title: string;
-  file_url: string;
+  file_url: string | null;
   date: string;
   created_at: string;
   order_index: number;
@@ -16,7 +16,7 @@ interface CompteRendu {
 interface SortableAGCardProps {
   cr: CompteRendu;
   onEdit: (cr: CompteRendu) => void;
-  onDelete: (id: string, fileUrl: string) => void;
+  onDelete: (id: string, fileUrl: string | null) => void;
 }
 
 export const SortableAGCard = ({ cr, onEdit, onDelete }: SortableAGCardProps) => {
@@ -68,14 +68,20 @@ export const SortableAGCard = ({ cr, onEdit, onDelete }: SortableAGCardProps) =>
         </div>
       </CardHeader>
       <CardContent>
-        <a 
-          href={cr.file_url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-sm text-primary hover:underline"
-        >
-          📄 Voir le PDF
-        </a>
+        {cr.file_url ? (
+          <a
+            href={cr.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:underline"
+          >
+            📄 Voir le PDF
+          </a>
+        ) : (
+          <span className="inline-block text-xs px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
+            ⏳ Document en attente
+          </span>
+        )}
       </CardContent>
     </Card>
   );

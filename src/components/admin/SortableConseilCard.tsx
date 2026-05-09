@@ -72,24 +72,30 @@ export const SortableConseilCard = ({ cr, onEdit, onDelete }: SortableConseilCar
         </div>
       </CardHeader>
       <CardContent>
-        <a 
-          href={displayUrl || '#'} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-sm text-primary hover:underline flex items-center gap-1"
-        >
-          {isLink ? (
-            <>
-              <LinkIcon className="h-4 w-4" />
-              Voir le lien
-            </>
-          ) : (
-            <>
-              <FileText className="h-4 w-4" />
-              Voir le document
-            </>
-          )}
-        </a>
+        {displayUrl ? (
+          <a
+            href={displayUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:underline flex items-center gap-1"
+          >
+            {isLink ? (
+              <>
+                <LinkIcon className="h-4 w-4" />
+                Voir le lien
+              </>
+            ) : (
+              <>
+                <FileText className="h-4 w-4" />
+                Voir le document
+              </>
+            )}
+          </a>
+        ) : (
+          <span className="inline-block text-xs px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
+            ⏳ Document en attente
+          </span>
+        )}
       </CardContent>
     </Card>
   );
