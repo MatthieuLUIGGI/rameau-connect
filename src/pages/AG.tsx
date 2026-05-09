@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 interface CompteRendu {
   id: string;
   title: string;
-  file_url: string;
+  file_url: string | null;
   date: string;
   created_at: string;
 }
@@ -101,17 +101,23 @@ const AG = () => {
                       </div>
                     </div>
                     
-                    <a 
-                      href={cr.file_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Button className="w-full" variant="outline">
-                        <Download className="h-4 w-4 mr-2" />
-                        Télécharger le PDF
+                    {cr.file_url ? (
+                      <a
+                        href={cr.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button className="w-full" variant="outline">
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger le PDF
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button className="w-full" variant="outline" disabled>
+                        ⏳ Document en attente
                       </Button>
-                    </a>
+                    )}
                   </CardContent>
                 </Card>
               );

@@ -42,7 +42,7 @@ interface CompteRendu {
 const compteRenduSchema = z.object({
   title: z.string().min(1, "Le titre est requis").max(200, "Le titre ne peut pas dépasser 200 caractères"),
   date: z.string().min(1, "La date est requise"),
-  type: z.enum(["file", "link"]),
+  type: z.enum(["file", "link", "pending"]),
   link_url: z.string().optional(),
 });
 
@@ -83,7 +83,7 @@ const AdminConseilSyndical = () => {
     defaultValues: {
       title: "",
       date: "",
-      type: "file" as "file" | "link",
+      type: "file" as "file" | "link" | "pending",
       link_url: "",
     },
   });
@@ -200,12 +200,6 @@ const AdminConseilSyndical = () => {
   };
 
   const handleSubmit = async (values: z.infer<typeof compteRenduSchema>) => {
-    // Validate based on type
-    if (values.type === "file" && !editingCR && !file) {
-      toast({ title: 'Erreur', description: 'Veuillez sélectionner un fichier', variant: 'destructive' });
-      return;
-    }
-
     if (values.type === "link" && !values.link_url?.trim()) {
       toast({ title: 'Erreur', description: 'Veuillez entrer une URL', variant: 'destructive' });
       return;
@@ -222,9 +216,13 @@ const AdminConseilSyndical = () => {
           fileUrl = await uploadFile(file);
         }
         linkUrl = null;
-      } else {
+      } else if (values.type === "link") {
         fileUrl = null;
         linkUrl = values.link_url || null;
+      } else {
+        // pending
+        fileUrl = null;
+        linkUrl = null;
       }
 
       if (editingCR) {
@@ -330,7 +328,7 @@ const AdminConseilSyndical = () => {
     setEditingCR(cr);
     form.setValue('title', cr.title);
     form.setValue('date', cr.date);
-    form.setValue('type', cr.link_url ? 'link' : 'file');
+    form.setValue('type', cr.link_url ? 'link' : (cr.file_url ? 'file' : 'pending'));
     form.setValue('link_url', cr.link_url || '');
     setIsDialogOpen(true);
   };
@@ -581,6 +579,10 @@ const AdminConseilSyndical = () => {
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="link" id="type-link" />
                             <Label htmlFor="type-link">Lien</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="pending" id="type-pending" />
+                            <Label htmlFor="type-pending">⏳ En attente</Label>
                           </div>
                         </RadioGroup>
                       </FormControl>

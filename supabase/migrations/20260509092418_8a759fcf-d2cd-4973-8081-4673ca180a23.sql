@@ -1,0 +1,1 @@
+ALTER TABLE public.comptes_rendus_ag ALTER COLUMN file_url DROP NOT NULL;

@@ -200,26 +200,32 @@ const ConseilSyndical = () => {
                       </div>
                     </div>
                     
-                    <a 
-                      href={displayUrl || '#'} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Button className="w-full" variant="outline">
-                        {isLink ? (
-                          <>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Ouvrir le lien
-                          </>
-                        ) : (
-                          <>
-                            <Download className="h-4 w-4 mr-2" />
-                            Télécharger le document
-                          </>
-                        )}
+                    {displayUrl ? (
+                      <a
+                        href={displayUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button className="w-full" variant="outline">
+                          {isLink ? (
+                            <>
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Ouvrir le lien
+                            </>
+                          ) : (
+                            <>
+                              <Download className="h-4 w-4 mr-2" />
+                              Télécharger le document
+                            </>
+                          )}
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button className="w-full" variant="outline" disabled>
+                        ⏳ Document en attente
                       </Button>
-                    </a>
+                    )}
                   </CardContent>
                 </Card>
               );
