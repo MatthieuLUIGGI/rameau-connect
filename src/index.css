@@ -192,3 +192,10 @@ All colors MUST be HSL.
 .dark .ql-snow .ql-tooltip {
   @apply bg-popover border-border;
 }
+
+/* Center images inserted in news article rich content */
+.actualite-content img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

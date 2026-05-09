@@ -135,7 +135,7 @@ const ActualiteDetail = () => {
             )}
             
             <div 
-              className="prose prose-lg max-w-none dark:prose-invert"
+              className="prose prose-lg max-w-none dark:prose-invert actualite-content"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(actualite.content) }}
             />
 

@@ -15,6 +15,10 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        display: ['Poppins', 'Inter', 'sans-serif'],
+        handwriting: ['Caveat', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",
