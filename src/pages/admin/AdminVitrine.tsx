@@ -8,11 +8,19 @@ import { ImagePlus, Save, Trash2, Loader2, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { logAudit } from "@/lib/auditLog";
 import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from "@/lib/imageOptimizer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
+import { Bold, Italic } from "lucide-react";
+import { buildDescriptionClasses } from "@/pages/Vitrine";
 
 const AdminVitrine = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [credits, setCredits] = useState("");
+  const [theme, setTheme] = useState("");
+  const [descFont, setDescFont] = useState<string>("sans");
+  const [descSize, setDescSize] = useState<string>("base");
+  const [descStyles, setDescStyles] = useState<string[]>([]);
   const [vitrineId, setVitrineId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,6 +38,10 @@ const AdminVitrine = () => {
       setImageUrl(data.image_url);
       setDescription(data.description || "");
       setCredits(data.credits || "");
+      setTheme((data as any).theme || "");
+      setDescFont((data as any).description_font || "sans");
+      setDescSize((data as any).description_size || "base");
+      setDescStyles(((data as any).description_style as string[] | null) || []);
     }
     setLoading(false);
   };
@@ -94,6 +106,10 @@ const AdminVitrine = () => {
       image_url: imageUrl,
       description,
       credits,
+      theme: theme || null,
+      description_font: descFont,
+      description_size: descSize,
+      description_style: descStyles,
       updated_at: new Date().toISOString(),
     }).eq("id", vitrineId);
 
@@ -135,6 +151,17 @@ const AdminVitrine = () => {
             <CardDescription>Glissez-déposez une image ou cliquez pour en sélectionner une</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Thème */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Thème de la vitrine</label>
+              <Input
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                placeholder="Ex: Noël, Printemps, Halloween..."
+              />
+              <p className="text-xs text-muted-foreground">Affiché au-dessus de la photo : « Thème de la vitrine : ... »</p>
+            </div>
+
             {/* Drop zone */}
             <div
               onDrop={handleDrop}
@@ -191,6 +218,66 @@ const AdminVitrine = () => {
                 placeholder="Décrivez la vitrine actuelle..."
                 rows={3}
               />
+            </div>
+
+            {/* Style d'écriture */}
+            <div className="space-y-3 rounded-lg border border-border p-4 bg-muted/30">
+              <label className="text-sm font-medium text-foreground">Style d'écriture de la description</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Police</label>
+                  <Select value={descFont} onValueChange={setDescFont}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sans">Sans-serif (par défaut)</SelectItem>
+                      <SelectItem value="serif">Serif élégante (Playfair)</SelectItem>
+                      <SelectItem value="display">Display moderne (Poppins)</SelectItem>
+                      <SelectItem value="handwriting">Manuscrite (Caveat)</SelectItem>
+                      <SelectItem value="mono">Monospace (JetBrains)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Taille</label>
+                  <Select value={descSize} onValueChange={setDescSize}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sm">Petite</SelectItem>
+                      <SelectItem value="base">Normale</SelectItem>
+                      <SelectItem value="lg">Grande</SelectItem>
+                      <SelectItem value="xl">Très grande</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Toggle
+                  pressed={descStyles.includes("bold")}
+                  onPressedChange={(p) =>
+                    setDescStyles((s) => (p ? [...new Set([...s, "bold"])] : s.filter((x) => x !== "bold")))
+                  }
+                  aria-label="Gras"
+                >
+                  <Bold className="h-4 w-4" />
+                </Toggle>
+                <Toggle
+                  pressed={descStyles.includes("italic")}
+                  onPressedChange={(p) =>
+                    setDescStyles((s) => (p ? [...new Set([...s, "italic"])] : s.filter((x) => x !== "italic")))
+                  }
+                  aria-label="Italique"
+                >
+                  <Italic className="h-4 w-4" />
+                </Toggle>
+              </div>
+              {description && (
+                <div className="rounded-md border border-border bg-background p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Aperçu :</p>
+                  <p className={buildDescriptionClasses(descFont, descSize, descStyles)}>
+                    {description}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Credits */}
