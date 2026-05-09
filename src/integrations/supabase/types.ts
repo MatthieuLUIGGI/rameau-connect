@@ -448,24 +448,36 @@ export type Database = {
           created_at: string | null
           credits: string | null
           description: string | null
+          description_font: string | null
+          description_size: string | null
+          description_style: string[] | null
           id: string
           image_url: string | null
+          theme: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           credits?: string | null
           description?: string | null
+          description_font?: string | null
+          description_size?: string | null
+          description_style?: string[] | null
           id?: string
           image_url?: string | null
+          theme?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           credits?: string | null
           description?: string | null
+          description_font?: string | null
+          description_size?: string | null
+          description_style?: string[] | null
           id?: string
           image_url?: string | null
+          theme?: string | null
           updated_at?: string | null
         }
         Relationships: []
