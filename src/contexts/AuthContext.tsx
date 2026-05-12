@@ -23,6 +23,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAG, setIsAG] = useState(false);
   const navigate = useNavigate();
 
+  const SESSION_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+
+  const checkSessionExpiry = async () => {
+    const loginTimeStr = localStorage.getItem('login_time');
+    if (!loginTimeStr) return false;
+    const loginTime = parseInt(loginTimeStr, 10);
+    if (isNaN(loginTime)) return false;
+    if (Date.now() - loginTime > SESSION_MAX_AGE_MS) {
+      localStorage.removeItem('login_time');
+      await supabase.auth.signOut();
+      return true;
+    }
+    return false;
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -44,7 +59,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const expired = await checkSessionExpiry();
+        if (expired) {
+          setSession(null);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+      }
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -54,7 +78,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Periodic check every minute
+    const interval = setInterval(() => {
+      checkSessionExpiry();
+    }, 60 * 1000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(interval);
+    };
   }, []);
 
   const checkAGRole = async (userId: string) => {
@@ -103,6 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .from('profiles')
         .update({ last_sign_in_at: new Date().toISOString() } as any)
         .eq('id', data.user.id);
+      localStorage.setItem('login_time', Date.now().toString());
       logAudit({ action: 'login', page: '/auth' });
       navigate('/');
     }
@@ -112,6 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await logAudit({ action: 'logout' });
+    localStorage.removeItem('login_time');
     await supabase.auth.signOut();
     navigate('/auth');
   };
