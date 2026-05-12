@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logAudit } from "@/lib/auditLog";
 
 interface Sondage {
   id: string;
@@ -140,8 +141,9 @@ const Sondages = () => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Succès', description: 'Votre vote a été enregistré' });
-      fetchUserVotes();
       const sondage = sondages.find(s => s.id === sondageId);
+      logAudit({ action: 'create', entityType: 'vote', entityId: sondageId, details: { title: sondage?.question, option: sondage?.options[selectedOptions[sondageId]] } });
+      fetchUserVotes();
       if (sondage) {
         fetchResults(sondageId, sondage.options.length);
       }
