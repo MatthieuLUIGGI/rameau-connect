@@ -1,42 +1,63 @@
-## Plan d'amélioration
+# Plan : Journal d'activité complet
 
-### 1. Vitrine – Thème au-dessus de la photo
-- Ajouter une colonne `theme` (text, nullable) à la table `vitrine`.
-- Page `/vitrine` : afficher au-dessus de l'image un titre **"Thème de la vitrine : {theme}"** (masqué si vide).
-- Page admin `AdminVitrine` : nouveau champ `Input` "Thème de la vitrine" sauvegardé avec le reste.
+## Objectif
 
-### 2. Vitrine – Style d'écriture du texte sous la photo
-- Ajouter trois colonnes à `vitrine` :
-  - `description_font` (text) – ex. `serif`, `sans`, `mono`, `display`, `handwriting`
-  - `description_size` (text) – `sm` | `base` | `lg` | `xl`
-  - `description_style` (text[]) – combinaison de `bold` / `italic`
-- Admin : sous le champ Description, ajouter :
-  - Un `Select` police (6 options : Default sans, Serif élégante, Manuscrite, Display, Mono, Sans moderne)
-  - Un `Select` taille (S / M / L / XL)
-  - Deux `Toggle` Gras / Italique
-  - Un aperçu en temps réel du rendu
-- Page `/vitrine` : appliquer dynamiquement les classes Tailwind correspondantes au paragraphe `description`.
-- Polices : utiliser celles déjà disponibles (font-serif, font-sans, font-mono) + ajouter 2 variables `--font-display` et `--font-handwriting` dans `index.css` / `tailwind.config.ts` (Google Fonts via `<link>` dans `index.html`, ex. *Playfair Display* et *Caveat*).
+Loguer **les 8 actions** (`page_view`, `login`, `logout`, `create`, `update`, `delete`, `export`, `password_change`) sur l'ensemble du site, et purger automatiquement les logs > 1 an.
 
-### 3. Actualités – Centrer les images dans le contenu
-- Dans `ActualiteDetail.tsx`, le contenu est rendu via `dangerouslySetInnerHTML` dans une div `prose`.
-- Ajouter une règle CSS ciblée (dans `index.css` ou via une classe sur le wrapper) :
-  ```css
-  .prose img { margin-left: auto; margin-right: auto; display: block; }
-  ```
-  Scoping : appliquer sur `.actualite-content img` pour ne pas affecter les autres `prose` du site.
-- Aucun changement requis dans l'éditeur d'admin actualités ni en base.
+Le timer de session 1h fixe après login est conservé tel quel.
 
-### Détails techniques
-- Migration SQL : `ALTER TABLE vitrine ADD COLUMN theme text, ADD COLUMN description_font text DEFAULT 'sans', ADD COLUMN description_size text DEFAULT 'base', ADD COLUMN description_style text[] DEFAULT '{}';`
-- Helpers TS dans `Vitrine.tsx` qui mappent `description_font/size/style` → classes Tailwind (`font-serif`, `text-lg`, `font-bold`, `italic`, …).
-- Aucune modification de RLS nécessaire (politiques existantes couvrent déjà `vitrine`).
-- Les types Supabase seront régénérés automatiquement après migration.
+## 1. Tracking automatique des visites de pages
 
-### Fichiers touchés
-- Migration : `supabase/migrations/<timestamp>_vitrine_theme_style.sql`
-- `src/pages/Vitrine.tsx`
-- `src/pages/admin/AdminVitrine.tsx`
-- `src/pages/ActualiteDetail.tsx` (ajout d'une classe wrapper)
-- `src/index.css` (règle img centrée + import polices si besoin)
-- `tailwind.config.ts` + `index.html` (nouvelles familles de police)
+Créer un hook `usePageViewLogger` monté dans `App.tsx` qui écoute `useLocation()` et appelle `logAudit({ action: 'page_view', page: pathname })` à chaque changement de route.
+
+Règles :
+- Ne pas loguer si l'utilisateur n'est pas connecté
+- Ignorer `/auth`, `/reset-password`, `/cookies`, `/mentions-legales`, `/confidentialite` (bruit inutile)
+- Debounce 500 ms pour éviter doublons en cas de double navigation
+
+## 2. Instrumentation des mutations admin
+
+Ajouter `logAudit({ action, entityType, entityId, details: { title } })` dans chaque fichier après chaque opération réussie :
+
+| Fichier | Actions à loguer | entity_type |
+|---|---|---|
+| `AdminActualites.tsx` | create / update / delete | `actualite` |
+| `AdminSondages.tsx` | create / update / delete | `sondage` |
+| `Sondages.tsx` | create (vote enregistré) | `vote` |
+| `AdminAG.tsx` | create / update / delete | `compte_rendu_ag` |
+| `AdminConseilSyndical.tsx` | create / update / delete | `compte_rendu_conseil` |
+| `AdminSyndic.tsx` | create / update / delete | `membre` (membres assemblée) |
+| `AdminBadgesVigik.tsx` | update | `badge_vigik` |
+| `AdminVitrine.tsx` | update (déjà fait — vérifier) | `vitrine` |
+| `BoardMembers.tsx` | role toggle (create/delete user_role), reset password | `user_role`, `profile` |
+| `BoardOverview.tsx` | approbation/rejet demandes de rôle | `role_request` |
+| `BoardPassword.tsx` | changement mot de passe Conseil & Board | `password_change` |
+| `Profile.tsx` | update profil, password_change | `profile` |
+
+Pour chaque log : passer `details: { title }` ou `{ name }` quand pertinent pour que la colonne "Détails" affiche un texte parlant dans le journal.
+
+## 3. Auto-purge logs > 1 an
+
+Migration SQL :
+- Activer `pg_cron` si pas déjà actif
+- Créer une fonction `purge_old_audit_logs()` qui fait `DELETE FROM audit_logs WHERE created_at < now() - interval '1 year'`
+- Planifier un cron quotidien à 03:00
+
+## 4. Vérification
+
+- Effectuer une action de chaque type connecté en tant qu'AG
+- Vérifier dans `/admin/board` → Journal d'activité que chaque ligne apparaît avec le bon badge, le bon utilisateur et le bon détail
+- Filtrer par chaque type d'action pour confirmer
+
+## Détails techniques
+
+- `usePageViewLogger` utilisera `useAuth()` pour obtenir `user` et ne logger que si présent
+- Pour les actions `create`, récupérer l'`id` retourné par Supabase via `.select().single()` et le passer en `entityId`
+- Pour les `delete`, capturer `id` + `title` avant la suppression
+- Le hook `useNotifications` n'est PAS instrumenté (lectures seulement)
+- Les RLS existantes permettent déjà l'INSERT par tout utilisateur authentifié (`auth.uid() = user_id`), aucun changement nécessaire
+
+## Hors scope
+
+- Comportement de session (gardé en 1h fixe après login comme demandé)
+- UI du journal (déjà complète : filtres, pagination, badges)
