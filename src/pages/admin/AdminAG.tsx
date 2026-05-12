@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Loader2, Plus } from 'lucide-react';
 import { z } from 'zod';
+import { logAudit } from '@/lib/auditLog';
 import {
   DndContext,
   closestCenter,
@@ -202,6 +203,7 @@ const AdminAG = () => {
         }
         
         toast({ title: 'Succès', description: 'Compte rendu modifié avec succès' });
+        logAudit({ action: 'update', entityType: 'compte_rendu_ag', entityId: editingCR.id, details: { title: formData.title } });
         fetchComptesRendus();
         resetForm();
       }
@@ -234,6 +236,7 @@ const AdminAG = () => {
         }
         
         toast({ title: 'Succès', description: 'Compte rendu ajouté avec succès' });
+        logAudit({ action: 'create', entityType: 'compte_rendu_ag', entityId: newCompteRendu.id, details: { title: formData.title } });
         fetchComptesRendus();
         resetForm();
       }
@@ -243,7 +246,7 @@ const AdminAG = () => {
 
   const handleDelete = async (id: string, fileUrl: string | null) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte rendu ?')) return;
-
+    const target = comptesRendus.find(c => c.id === id);
     if (fileUrl) {
       const urlParts = fileUrl.split('/');
       const fileName = urlParts[urlParts.length - 1];
@@ -267,6 +270,7 @@ const AdminAG = () => {
         .eq('reference_id', id);
       
       toast({ title: 'Succès', description: 'Compte rendu supprimé avec succès' });
+      logAudit({ action: 'delete', entityType: 'compte_rendu_ag', entityId: id, details: { title: target?.title } });
       fetchComptesRendus();
     }
   };
