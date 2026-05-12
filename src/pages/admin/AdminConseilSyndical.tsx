@@ -28,6 +28,7 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableConseilCard } from '@/components/admin/SortableConseilCard';
+import { logAudit } from '@/lib/auditLog';
 
 interface CompteRendu {
   id: string;
@@ -261,10 +262,11 @@ const AdminConseilSyndical = () => {
         }
         
         toast({ title: 'Succès', description: 'Compte rendu modifié avec succès' });
+        logAudit({ action: 'update', entityType: 'compte_rendu_conseil', entityId: editingCR.id, details: { title: values.title } });
       } else {
         const nextOrderIndex = comptesRendus.length;
         
-        const { error } = await supabase
+        const { data: created, error } = await supabase
           .from('comptes_rendus_conseil_syndical')
           .insert({
             title: values.title,
@@ -272,10 +274,13 @@ const AdminConseilSyndical = () => {
             file_url: fileUrl,
             link_url: linkUrl,
             order_index: nextOrderIndex,
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
         toast({ title: 'Succès', description: 'Compte rendu ajouté avec succès' });
+        logAudit({ action: 'create', entityType: 'compte_rendu_conseil', entityId: created?.id, details: { title: values.title } });
       }
 
       resetForm();
@@ -289,7 +294,7 @@ const AdminConseilSyndical = () => {
 
   const handleDelete = async (id: string, fileUrl: string | null) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte rendu ?')) return;
-
+    const target = comptesRendus.find(c => c.id === id);
     // Delete file from storage if exists
     if (fileUrl) {
       const urlParts = fileUrl.split('/');
@@ -308,6 +313,7 @@ const AdminConseilSyndical = () => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Succès', description: 'Compte rendu supprimé' });
+      logAudit({ action: 'delete', entityType: 'compte_rendu_conseil', entityId: id, details: { title: target?.title } });
       fetchComptesRendus();
     }
   };
@@ -350,6 +356,7 @@ const AdminConseilSyndical = () => {
 
       if (data === true) {
         toast({ title: 'Succès', description: 'Mot de passe défini avec succès' });
+        logAudit({ action: 'password_change', entityType: 'conseil_syndical_config' });
         passwordForm.reset();
         setIsPasswordDialogOpen(false);
       } else {

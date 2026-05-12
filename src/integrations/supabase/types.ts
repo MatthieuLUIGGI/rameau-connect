@@ -539,6 +539,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_old_audit_logs: { Args: never; Returns: undefined }
       set_admin_board_password: {
         Args: { new_password: string }
         Returns: boolean
