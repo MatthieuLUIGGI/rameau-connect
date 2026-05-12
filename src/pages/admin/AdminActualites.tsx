@@ -12,6 +12,7 @@ import { z } from 'zod';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from '@/lib/imageOptimizer';
+import { logAudit } from '@/lib/auditLog';
 
 interface Actualite {
   id: string;
@@ -158,6 +159,7 @@ const AdminActualites = () => {
         }
         
         toast({ title: 'Succès', description: 'Actualité modifiée avec succès' });
+        logAudit({ action: 'update', entityType: 'actualite', entityId: editingActualite.id, details: { title: rest.title } });
         fetchActualites();
         resetForm();
       }
@@ -194,6 +196,7 @@ const AdminActualites = () => {
         }
         
         toast({ title: 'Succès', description: 'Actualité ajoutée avec succès' });
+        logAudit({ action: 'create', entityType: 'actualite', entityId: newActualite.id, details: { title: rest.title } });
         fetchActualites();
         resetForm();
       }
@@ -241,6 +244,7 @@ const AdminActualites = () => {
             .eq('reference_id', id);
           
           toast({ title: 'Succès', description: 'Actualité supprimée avec succès' });
+          logAudit({ action: 'delete', entityType: 'actualite', entityId: id });
           fetchActualites();
         }
   };
