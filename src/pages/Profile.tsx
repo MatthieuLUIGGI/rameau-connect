@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
+import { logAudit } from "@/lib/auditLog";
 
 const passwordSchema = z.string()
   .min(8, "Le mot de passe doit contenir au moins 8 caractères")
@@ -85,6 +86,7 @@ const Profile = () => {
         title: "Succès",
         description: "Profil mis à jour",
       });
+      logAudit({ action: 'update', entityType: 'profile', entityId: user?.id, details: { first_name: firstName, last_name: lastName } });
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
@@ -133,6 +135,7 @@ const Profile = () => {
         title: "Succès",
         description: "Mot de passe modifié",
       });
+      logAudit({ action: 'password_change', entityType: 'profile', entityId: user?.id });
 
       setNewPassword("");
       setConfirmPassword("");
