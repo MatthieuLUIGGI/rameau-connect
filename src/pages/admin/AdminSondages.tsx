@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus, X } from 'lucide-react';
 import { z } from 'zod';
+import { logAudit } from '@/lib/auditLog';
 
 interface Sondage {
   id: string;
@@ -117,6 +118,7 @@ const AdminSondages = () => {
         }
         
         toast({ title: 'Succès', description: 'Sondage modifié avec succès' });
+        logAudit({ action: 'update', entityType: 'sondage', entityId: editingSondage.id, details: { title: formData.question } });
         fetchSondages();
         resetForm();
       }
@@ -147,6 +149,7 @@ const AdminSondages = () => {
         }
         
         toast({ title: 'Succès', description: 'Sondage ajouté avec succès' });
+        logAudit({ action: 'create', entityType: 'sondage', entityId: newSondage.id, details: { title: formData.question } });
         fetchSondages();
         resetForm();
       }
@@ -155,7 +158,7 @@ const AdminSondages = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce sondage ?')) return;
-    
+    const target = sondages.find(s => s.id === id);
     const { error } = await supabase
       .from('sondages')
       .delete()
@@ -172,6 +175,7 @@ const AdminSondages = () => {
         .eq('reference_id', id);
       
       toast({ title: 'Succès', description: 'Sondage supprimé avec succès' });
+      logAudit({ action: 'delete', entityType: 'sondage', entityId: id, details: { title: target?.question } });
       fetchSondages();
     }
   };
