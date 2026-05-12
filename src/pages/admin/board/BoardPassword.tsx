@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logAudit } from "@/lib/auditLog";
 
 const BoardPassword = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -27,6 +28,7 @@ const BoardPassword = () => {
       const { error } = await supabase.rpc('set_admin_board_password', { new_password: newPassword });
       if (error) throw error;
       toast({ title: 'Mot de passe défini avec succès' });
+      logAudit({ action: 'password_change', entityType: 'admin_board_config' });
       setNewPassword("");
       setConfirmPassword("");
     } catch {
