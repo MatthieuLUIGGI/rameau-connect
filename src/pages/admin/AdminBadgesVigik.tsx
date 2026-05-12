@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { logAudit } from "@/lib/auditLog";
 
 interface StockRow {
   id: string;
@@ -72,6 +73,7 @@ const AdminBadgesVigik = () => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Sauvegardé", description: "Informations mises à jour avec succès" });
+      logAudit({ action: row?.id ? 'update' : 'create', entityType: 'badge_vigik', entityId: row?.id, details: { price: priceValue } });
       await fetchRow();
     }
     setIsLoading(false);
