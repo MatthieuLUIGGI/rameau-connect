@@ -42,6 +42,7 @@ import CookieBanner from "@/components/CookieBanner";
 import MentionsLegales from "./pages/MentionsLegales";
 import Confidentialite from "./pages/Confidentialite";
 import Cookies from "./pages/Cookies";
+import { usePageViewLogger } from "@/hooks/usePageViewLogger";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,11 @@ function AnalyticsIfConsented() {
   const { consent } = useCookieConsent();
   if (!consent.analytics) return null;
   return <Analytics />;
+}
+
+function PageViewTracker() {
+  usePageViewLogger();
+  return null;
 }
 
 const App = () => (
@@ -62,6 +68,7 @@ const App = () => (
             <CookieConsentProvider>
               <div className="flex flex-col min-h-screen">
               <ScrollToTop />
+              <PageViewTracker />
               <Navigation />
               <main className="flex-1">
                 <Routes>
