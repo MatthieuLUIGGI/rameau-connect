@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Pencil, Trash2, Plus, UploadCloud, Image as ImageIcon, X as XIcon, Leaf } from 'lucide-react';
 import { z } from 'zod';
 import { optimizeImage, needsOptimization, formatFileSize, calculateReduction } from '@/lib/imageOptimizer';
+import { logAudit } from '@/lib/auditLog';
 
 interface Membre {
   id: string;
@@ -94,18 +95,22 @@ const AdminAssemblee = () => {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
         toast({ title: 'Succès', description: 'Membre modifié avec succès' });
+        logAudit({ action: 'update', entityType: 'membre', entityId: editingMembre.id, details: { title: formData.name } });
         fetchMembres();
         resetForm();
       }
     } else {
-      const { error } = await supabase
+      const { data: created, error } = await supabase
         .from('membres_assemblee')
-        .insert([formData]);
+        .insert([formData])
+        .select()
+        .single();
       
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
         toast({ title: 'Succès', description: 'Membre ajouté avec succès' });
+        logAudit({ action: 'create', entityType: 'membre', entityId: created?.id, details: { title: formData.name } });
         fetchMembres();
         resetForm();
       }
@@ -114,7 +119,7 @@ const AdminAssemblee = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) return;
-    
+    const target = membres.find(m => m.id === id);
     const { error } = await supabase
       .from('membres_assemblee')
       .delete()
@@ -124,6 +129,7 @@ const AdminAssemblee = () => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Succès', description: 'Membre supprimé avec succès' });
+      logAudit({ action: 'delete', entityType: 'membre', entityId: id, details: { title: target?.name } });
       fetchMembres();
     }
   };
