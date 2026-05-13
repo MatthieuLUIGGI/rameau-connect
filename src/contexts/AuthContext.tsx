@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAG, setIsAG] = useState(false);
   const navigate = useNavigate();
 
-  const SESSION_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+  const SESSION_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
+  const TAB_SESSION_KEY = 'tab_session_active';
 
   const checkSessionExpiry = async () => {
     const loginTimeStr = localStorage.getItem('login_time');
@@ -31,6 +32,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const loginTime = parseInt(loginTimeStr, 10);
     if (isNaN(loginTime)) return false;
     if (Date.now() - loginTime > SESSION_MAX_AGE_MS) {
+      localStorage.removeItem('login_time');
+      await supabase.auth.signOut();
+      return true;
+    }
+    return false;
+  };
+
+  // If sessionStorage flag is missing while a Supabase session exists,
+  // it means the tab/browser was closed and reopened → force sign out.
+  const checkTabClosed = async (hasSession: boolean) => {
+    if (!hasSession) return false;
+    const tabFlag = sessionStorage.getItem(TAB_SESSION_KEY);
+    if (!tabFlag) {
       localStorage.removeItem('login_time');
       await supabase.auth.signOut();
       return true;
@@ -61,6 +75,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
+        const tabClosed = await checkTabClosed(true);
+        if (tabClosed) {
+          setSession(null);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
         const expired = await checkSessionExpiry();
         if (expired) {
           setSession(null);
@@ -78,10 +99,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    // Periodic check every minute
+    // Periodic check every 30 seconds
     const interval = setInterval(() => {
       checkSessionExpiry();
-    }, 60 * 1000);
+    }, 30 * 1000);
 
     return () => {
       subscription.unsubscribe();
@@ -136,6 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .update({ last_sign_in_at: new Date().toISOString() } as any)
         .eq('id', data.user.id);
       localStorage.setItem('login_time', Date.now().toString());
+      sessionStorage.setItem(TAB_SESSION_KEY, '1');
       logAudit({ action: 'login', page: '/auth' });
       navigate('/');
     }
@@ -146,6 +168,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     await logAudit({ action: 'logout' });
     localStorage.removeItem('login_time');
+    sessionStorage.removeItem(TAB_SESSION_KEY);
     await supabase.auth.signOut();
     navigate('/auth');
   };
